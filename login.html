@@ -163,37 +163,51 @@ body::before {
     import { computeInitials } from './auth.js';
 
     async function resolveProfile(user) {
-      let { data: profile } = await supabase
+      const { data: profile, error: selectErr } = await supabase
         .from('profiles')
         .select('couple_id')
         .eq('id', user.id)
         .single();
 
-      if (!profile) {
-        const name = user.user_metadata?.display_name || user.email.split('@')[0];
-        const { error: insertErr } = await supabase.from('profiles').insert({
-          id:           user.id,
-          display_name: name,
-          initials:     computeInitials(name),
-        });
-        if (!insertErr) {
-          const { data: refetched } = await supabase
-            .from('profiles').select('couple_id').eq('id', user.id).single();
-          profile = refetched;
-        }
+      if (profile) return { profile, dbError: null };
+
+      // PGRST116 = no rows found — expected for new users
+      const isNotFound = selectErr?.code === 'PGRST116';
+      if (selectErr && !isNotFound) {
+        return { profile: null, dbError: `SELECT failed: ${selectErr.message} (${selectErr.code})` };
       }
 
-      return profile;
+      const name = user.user_metadata?.display_name || user.email.split('@')[0];
+      const { error: insertErr } = await supabase.from('profiles').insert({
+        id:           user.id,
+        display_name: name,
+        initials:     computeInitials(name),
+      });
+
+      if (insertErr) {
+        return { profile: null, dbError: `INSERT failed: ${insertErr.message} (${insertErr.code})` };
+      }
+
+      const { data: refetched, error: refetchErr } = await supabase
+        .from('profiles').select('couple_id').eq('id', user.id).single();
+
+      if (refetchErr || !refetched) {
+        return { profile: null, dbError: `Re-fetch after insert failed: ${refetchErr?.message}` };
+      }
+
+      return { profile: refetched, dbError: null };
     }
 
     // If already signed in, skip to the right page
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      const profile = await resolveProfile(session.user);
+      const { profile, dbError } = await resolveProfile(session.user);
       if (profile) {
         window.location.replace(profile.couple_id ? 'feed.html' : 'pair.html');
       } else {
         await supabase.auth.signOut();
+        // fall through and show login form; dbError visible in console
+        console.error('Auto-login failed:', dbError);
       }
     }
 
@@ -229,11 +243,11 @@ body::before {
         return;
       }
 
-      const profile = await resolveProfile(data.user);
+      const { profile, dbError } = await resolveProfile(data.user);
       if (profile) {
         window.location.replace(profile.couple_id ? 'feed.html' : 'pair.html');
       } else {
-        showError('Account setup failed — your profile could not be loaded. Check that Supabase migrations have been applied.');
+        showError(dbError || 'Profile could not be loaded. Check the browser console for details.');
         btn.disabled = false;
         btn.textContent = 'Sign in';
       }
