@@ -6,7 +6,7 @@
   <title>F42 — Feed</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,700;0,800;1,700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/app.css" />
 </head>
@@ -15,7 +15,7 @@
   <div class="app-shell">
 
     <aside class="sidebar">
-      <div class="sidebar-logo">F<span>42</span></div>
+      <div class="sidebar-logo">F42</div>
 
       <div class="couple-card">
         <div class="couple-avatars">
@@ -55,24 +55,24 @@
 
       <div class="daily-summary">
         <div class="summary-card">
-          <div class="summary-label">Alex · kcal</div>
+          <div class="summary-label">Alex · calories</div>
           <div class="summary-bar-wrap">
             <div class="summary-bar summary-bar--a" style="width: 68%"></div>
           </div>
-          <div class="summary-val">1 360 / 2 000</div>
+          <div class="summary-val">1 360 / 2 000 kcal</div>
         </div>
         <div class="summary-card">
-          <div class="summary-label">Marco · kcal</div>
+          <div class="summary-label">Marco · calories</div>
           <div class="summary-bar-wrap">
             <div class="summary-bar summary-bar--b" style="width: 82%"></div>
           </div>
-          <div class="summary-val">1 970 / 2 400</div>
+          <div class="summary-val">1 970 / 2 400 kcal</div>
         </div>
       </div>
 
       <div class="feed" id="feed">
 
-        <div class="feed-entry" data-entry="0">
+        <div class="feed-entry">
           <div class="entry-avatar entry-avatar--a">AL</div>
           <div class="entry-body">
             <div class="entry-header">
@@ -90,14 +90,14 @@
               </div>
             </div>
             <div class="entry-reactions">
-              <button class="react-btn" onclick="addReaction(this, '🔥')">🔥 <span>1</span></button>
-              <button class="react-btn" onclick="addReaction(this, '❤️')">❤️ <span>0</span></button>
+              <button class="react-btn reacted" onclick="addReaction(this,'🔥')">🔥 <span>1</span></button>
+              <button class="react-btn" onclick="addReaction(this,'❤️')">❤️ <span>0</span></button>
               <button class="react-btn react-btn--add" onclick="showReactPicker(this)">+</button>
             </div>
           </div>
         </div>
 
-        <div class="feed-entry" data-entry="1">
+        <div class="feed-entry">
           <div class="entry-avatar entry-avatar--b">MR</div>
           <div class="entry-body">
             <div class="entry-header">
@@ -114,14 +114,14 @@
               </div>
             </div>
             <div class="entry-reactions">
-              <button class="react-btn" onclick="addReaction(this, '🔥')">🔥 <span>2</span></button>
-              <button class="react-btn" onclick="addReaction(this, '👏')">👏 <span>1</span></button>
+              <button class="react-btn reacted" onclick="addReaction(this,'🔥')">🔥 <span>2</span></button>
+              <button class="react-btn" onclick="addReaction(this,'👏')">👏 <span>1</span></button>
               <button class="react-btn react-btn--add" onclick="showReactPicker(this)">+</button>
             </div>
           </div>
         </div>
 
-        <div class="feed-entry" data-entry="2">
+        <div class="feed-entry">
           <div class="entry-avatar entry-avatar--a">AL</div>
           <div class="entry-body">
             <div class="entry-header">
@@ -139,7 +139,7 @@
               </div>
             </div>
             <div class="entry-reactions">
-              <button class="react-btn" onclick="addReaction(this, '❤️')">❤️ <span>1</span></button>
+              <button class="react-btn reacted" onclick="addReaction(this,'❤️')">❤️ <span>1</span></button>
               <button class="react-btn react-btn--add" onclick="showReactPicker(this)">+</button>
             </div>
           </div>

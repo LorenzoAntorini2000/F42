@@ -6,38 +6,38 @@
   <title>F42 — Fit For Two</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,700;0,800;1,700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
   <nav class="nav">
-    <div class="nav-logo">F<span class="nav-logo-accent">42</span></div>
+    <div class="nav-logo">F42</div>
     <div class="nav-links">
       <a href="#features">Features</a>
       <a href="#how-it-works">How it works</a>
-      <a href="feed.html" class="nav-cta">Open app</a>
+      <a href="feed.html" class="nav-cta">Open app →</a>
     </div>
   </nav>
 
   <header class="hero">
     <div class="hero-eyebrow">Fitness, together</div>
     <h1 class="hero-title">
-      Fit For<br />
-      <em>Two.</em>
+      Stronger<br />
+      <span class="g">side by side.</span>
     </h1>
     <p class="hero-subtitle">
-      The couples fitness app where you share what you eat,<br />
-      celebrate every workout, and grow stronger side by side.
+      The couples fitness app where you share meals,<br />
+      celebrate every workout, and grow together — daily.
     </p>
     <div class="hero-actions">
-      <a href="feed.html" class="btn btn-primary">Try the app</a>
-      <a href="#features" class="btn btn-ghost">Learn more</a>
+      <a href="feed.html" class="btn btn-primary">Try the app →</a>
+      <a href="#features" class="btn btn-ghost">See features</a>
     </div>
     <div class="hero-pill-row">
-      <span class="pill">Shared meal feed</span>
-      <span class="pill">Workout sync</span>
-      <span class="pill">Couple score</span>
+      <span class="pill">🥗 Shared meal feed</span>
+      <span class="pill">🏃 Workout sync</span>
+      <span class="pill">✨ Couple score</span>
     </div>
   </header>
 
@@ -79,7 +79,7 @@
       <div class="feature-card">
         <div class="feature-tag">Training</div>
         <h2 class="feature-title">Workout<br />sync</h2>
-        <p class="feature-body">Log sessions, share live activity, and find slots to train together using your shared calendar.</p>
+        <p class="feature-body">Log sessions, share live activity, and find slots to train together on your shared calendar.</p>
         <div class="feature-mock sync-mock">
           <div class="sync-row">
             <div class="sync-day active">Mon</div>
@@ -100,14 +100,21 @@
       <div class="feature-card">
         <div class="feature-tag">Motivation</div>
         <h2 class="feature-title">Couple<br />score</h2>
-        <p class="feature-body">One combined weekly score that rises and falls together. You win as a team or not at all.</p>
+        <p class="feature-body">One combined weekly score. You rise and fall together — not against each other.</p>
         <div class="feature-mock score-mock">
           <div class="score-ring">
-            <svg viewBox="0 0 80 80" width="80" height="80">
-              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--surface-2)" stroke-width="6"/>
-              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--accent)" stroke-width="6"
-                stroke-dasharray="167" stroke-dashoffset="34"
-                stroke-linecap="round" transform="rotate(-90 40 40)"/>
+            <svg viewBox="0 0 88 88" width="88" height="88">
+              <circle cx="44" cy="44" r="36" fill="none" stroke="rgba(148,163,184,0.15)" stroke-width="7"/>
+              <circle cx="44" cy="44" r="36" fill="none"
+                stroke="url(#scoreGrad)" stroke-width="7"
+                stroke-dasharray="188" stroke-dashoffset="38"
+                stroke-linecap="round" transform="rotate(-90 44 44)"/>
+              <defs>
+                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#34C77B"/>
+                  <stop offset="100%" stop-color="#7B6CF6"/>
+                </linearGradient>
+              </defs>
             </svg>
             <div class="score-label">82</div>
           </div>
@@ -120,31 +127,35 @@
 
   <section class="how" id="how-it-works">
     <h2 class="how-title">How it works</h2>
+    <p class="how-subtitle">Three steps to fitness as a team</p>
     <div class="how-steps">
       <div class="how-step">
-        <div class="step-num">01</div>
+        <div class="step-icon step-icon--1">🔗</div>
+        <div class="step-num">Step 01</div>
         <h3 class="step-title">Connect as a couple</h3>
-        <p class="step-body">Create your profiles and link accounts with a shared invite code. Your space stays private — just the two of you.</p>
+        <p class="step-body">Create profiles and link accounts with a shared invite code. Completely private — just the two of you.</p>
       </div>
       <div class="how-step">
-        <div class="step-num">02</div>
+        <div class="step-icon step-icon--2">📋</div>
+        <div class="step-num">Step 02</div>
         <h3 class="step-title">Log meals &amp; workouts</h3>
         <p class="step-body">Quick-log food and sessions throughout the day. Your partner sees updates in real time on the shared feed.</p>
       </div>
       <div class="how-step">
-        <div class="step-num">03</div>
+        <div class="step-icon step-icon--3">🎉</div>
+        <div class="step-num">Step 03</div>
         <h3 class="step-title">Motivate each other</h3>
-        <p class="step-body">React to entries, cheer on streaks, and watch your combined couple score grow every week.</p>
+        <p class="step-body">React to entries, cheer on streaks, and watch your combined couple score grow every single week.</p>
       </div>
     </div>
   </section>
 
   <footer class="footer">
-    <div class="footer-logo">F<span>42</span></div>
+    <div class="footer-logo">F42</div>
     <p class="footer-tagline">Fit For Two — built with ♥ on GitHub</p>
     <p class="footer-links">
       <a href="https://github.com/" target="_blank">GitHub</a> ·
-      <a href="feed.html">App</a>
+      <a href="feed.html">Open app</a>
     </p>
   </footer>
 
