@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F42 — Feed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body class="app-body">
+
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">F<span>42</span></div>
+
+      <div class="couple-card">
+        <div class="couple-avatars">
+          <div class="c-avatar c-avatar--a">AL</div>
+          <div class="c-avatar c-avatar--b">MR</div>
+        </div>
+        <div class="couple-score-wrap">
+          <div class="couple-score-label">Couple score</div>
+          <div class="couple-score-val">82</div>
+        </div>
+      </div>
+
+      <nav class="app-nav">
+        <a href="feed.html" class="app-nav-item active">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+          Feed
+        </a>
+        <a href="workouts.html" class="app-nav-item">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8h2m10 0h2M3 8l1-3h8l1 3M3 8l1 3h8l1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Workouts
+        </a>
+        <a href="goals.html" class="app-nav-item">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1" fill="currentColor"/></svg>
+          Goals
+        </a>
+      </nav>
+
+      <a href="index.html" class="sidebar-back">← Back to home</a>
+    </aside>
+
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <h1 class="app-page-title">Today's feed</h1>
+        <div class="topbar-date" id="today-date"></div>
+      </div>
+
+      <div class="daily-summary">
+        <div class="summary-card">
+          <div class="summary-label">Alex · kcal</div>
+          <div class="summary-bar-wrap">
+            <div class="summary-bar summary-bar--a" style="width: 68%"></div>
+          </div>
+          <div class="summary-val">1 360 / 2 000</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Marco · kcal</div>
+          <div class="summary-bar-wrap">
+            <div class="summary-bar summary-bar--b" style="width: 82%"></div>
+          </div>
+          <div class="summary-val">1 970 / 2 400</div>
+        </div>
+      </div>
+
+      <div class="feed" id="feed">
+
+        <div class="feed-entry" data-entry="0">
+          <div class="entry-avatar entry-avatar--a">AL</div>
+          <div class="entry-body">
+            <div class="entry-header">
+              <span class="entry-who">Alex</span>
+              <span class="entry-type">logged a meal</span>
+              <span class="entry-time">12:34</span>
+            </div>
+            <div class="entry-content">
+              <div class="entry-meal-name">Grilled chicken salad</div>
+              <div class="entry-macros">
+                <span>480 kcal</span>
+                <span>42g protein</span>
+                <span>18g carbs</span>
+                <span>14g fat</span>
+              </div>
+            </div>
+            <div class="entry-reactions">
+              <button class="react-btn" onclick="addReaction(this, '🔥')">🔥 <span>1</span></button>
+              <button class="react-btn" onclick="addReaction(this, '❤️')">❤️ <span>0</span></button>
+              <button class="react-btn react-btn--add" onclick="showReactPicker(this)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="feed-entry" data-entry="1">
+          <div class="entry-avatar entry-avatar--b">MR</div>
+          <div class="entry-body">
+            <div class="entry-header">
+              <span class="entry-who">Marco</span>
+              <span class="entry-type">completed a workout</span>
+              <span class="entry-time">08:15</span>
+            </div>
+            <div class="entry-content entry-content--workout">
+              <div class="entry-meal-name">Morning run</div>
+              <div class="entry-workout-stats">
+                <div class="wstat"><div class="wstat-val">5.2</div><div class="wstat-lbl">km</div></div>
+                <div class="wstat"><div class="wstat-val">28</div><div class="wstat-lbl">min</div></div>
+                <div class="wstat"><div class="wstat-val">312</div><div class="wstat-lbl">kcal</div></div>
+              </div>
+            </div>
+            <div class="entry-reactions">
+              <button class="react-btn" onclick="addReaction(this, '🔥')">🔥 <span>2</span></button>
+              <button class="react-btn" onclick="addReaction(this, '👏')">👏 <span>1</span></button>
+              <button class="react-btn react-btn--add" onclick="showReactPicker(this)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="feed-entry" data-entry="2">
+          <div class="entry-avatar entry-avatar--a">AL</div>
+          <div class="entry-body">
+            <div class="entry-header">
+              <span class="entry-who">Alex</span>
+              <span class="entry-type">logged a meal</span>
+              <span class="entry-time">07:45</span>
+            </div>
+            <div class="entry-content">
+              <div class="entry-meal-name">Oat bowl with berries &amp; honey</div>
+              <div class="entry-macros">
+                <span>390 kcal</span>
+                <span>12g protein</span>
+                <span>62g carbs</span>
+                <span>8g fat</span>
+              </div>
+            </div>
+            <div class="entry-reactions">
+              <button class="react-btn" onclick="addReaction(this, '❤️')">❤️ <span>1</span></button>
+              <button class="react-btn react-btn--add" onclick="showReactPicker(this)">+</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="log-bar">
+        <button class="log-btn log-btn--meal" onclick="openLogModal('meal')">+ Log meal</button>
+        <button class="log-btn log-btn--workout" onclick="openLogModal('workout')">+ Log workout</button>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Log meal</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/feed.js"></script>
+</body>
+</html>
