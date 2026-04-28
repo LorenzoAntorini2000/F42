@@ -227,6 +227,7 @@ async function submitWorkout() {
 /* ── Entry rendering ── */
 
 function buildEntryFromRow(row, myId) {
+  if (!row.profile) return null;
   const isMe = row.user_id === myId;
   const cls  = isMe ? 'a' : 'b';
   const time = new Date(row.logged_at).toLocaleTimeString('en-GB', {

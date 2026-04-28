@@ -288,12 +288,12 @@ body::before {
 
     </div>
 
-    <p class="pair-footer"><a href="login.html">← Sign in with a different account</a></p>
+    <p class="pair-footer"><a href="#" id="btn-switch-account">← Sign in with a different account</a></p>
   </div>
 
   <script type="module">
     import { supabase } from './supabase-client.js';
-    import { guardSession } from './auth.js';
+    import { guardSession, signOut } from './auth.js';
 
     /* ── helpers ────────────────────────────────────────────────────────── */
 
@@ -350,7 +350,9 @@ body::before {
 
     /* ── init ────────────────────────────────────────────────────────────── */
 
-    const profile = await guardSession();
+    let profile;
+    try {
+    profile = await guardSession();
     if (!profile) return;
 
     let couple = null;
@@ -370,8 +372,6 @@ body::before {
       }
     }
 
-    document.body.style.visibility = 'visible';
-
     if (couple) {
       // Already created a couple, still waiting
       document.getElementById('code-display').textContent = formatCode(couple.invite_code);
@@ -379,6 +379,12 @@ body::before {
       startPolling(couple.id);
     } else {
       show('state-create');
+    }
+
+    } catch (err) {
+      console.error('F42 pair init error:', err);
+    } finally {
+      document.body.style.visibility = 'visible';
     }
 
     /* ── generate code ───────────────────────────────────────────────────── */
@@ -405,10 +411,17 @@ body::before {
       }
 
       // Update own profile with couple_id
-      await supabase
+      const { error: profileErr } = await supabase
         .from('profiles')
         .update({ couple_id: newCouple.id })
         .eq('id', profile.id);
+
+      if (profileErr) {
+        showCreateError('Failed to save your couple link. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Generate invite code';
+        return;
+      }
 
       document.getElementById('code-display').textContent = formatCode(newCouple.invite_code);
       show('state-waiting');
@@ -481,10 +494,17 @@ body::before {
         return;
       }
 
-      await supabase
+      const { error: joinProfileErr } = await supabase
         .from('profiles')
         .update({ couple_id: rows[0].id })
         .eq('id', profile.id);
+
+      if (joinProfileErr) {
+        showJoinError('Failed to save your couple link. Please try again.');
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join';
+        return;
+      }
 
       window.location.replace('feed.html');
     }
@@ -492,6 +512,11 @@ body::before {
     document.getElementById('btn-join').addEventListener('click', attemptJoin);
     document.getElementById('input-join-code').addEventListener('keydown', e => {
       if (e.key === 'Enter') attemptJoin();
+    });
+
+    document.getElementById('btn-switch-account').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut();
     });
 
     /* ── copy button ─────────────────────────────────────────────────────── */

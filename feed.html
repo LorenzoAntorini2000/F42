@@ -903,6 +903,7 @@ body::before {
 
       entries.forEach((row, i) => {
         const el = buildEntryFromRow(row, profile.id);
+        if (!el) return;
         el.style.animationDelay = `${i * 60}ms`;
         feed.appendChild(el);
       });
@@ -963,6 +964,7 @@ body::before {
     }
 
     /* ── init ── */
+    try {
     const profile = await guardSession();
     if (!profile) return;
 
@@ -996,7 +998,11 @@ body::before {
       updateCoupleScore(),
     ]);
 
-    document.body.style.visibility = 'visible';
+    } catch (err) {
+      console.error('F42 feed init error:', err);
+    } finally {
+      document.body.style.visibility = 'visible';
+    }
 
     /* ── Phase 5: real-time subscriptions ── */
     const feedEl = document.getElementById('feed');
