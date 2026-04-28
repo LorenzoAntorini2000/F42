@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>F42 — Feed</title>
-  <style>body { visibility: hidden; }</style>
+  <style>
+    body { visibility: hidden; animation: f42show 0s 5s forwards; }
+    @keyframes f42show { to { visibility: visible; } }
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -828,196 +831,58 @@ body::before {
     const DAILY_KCAL_GOAL    = 2000;
     const WEEKLY_ENTRIES_MAX = 14;
 
-    /* ── skeleton placeholder ── */
-    function skeletonHTML() {
-      const card = `
-        <div class="feed-skeleton">
-          <div class="skeleton feed-skeleton-avatar"></div>
-          <div class="feed-skeleton-body">
-            <div class="skeleton feed-skeleton-line feed-skeleton-line--short"></div>
-            <div class="skeleton feed-skeleton-line feed-skeleton-line--long"></div>
-            <div class="skeleton feed-skeleton-line feed-skeleton-line--med"></div>
-          </div>
-        </div>`;
-      return card + card + card;
-    }
+    (async () => {
+      let profile, partner;
 
-    /* ── reaction counts on initial load ── */
-    function populateReactionCounts(reactions) {
-      const grouped = {};
-      for (const r of reactions) {
-        const key = `${r.entry_id}::${r.emoji}`;
-        if (!grouped[key]) grouped[key] = { entry_id: r.entry_id, emoji: r.emoji, users: [] };
-        grouped[key].users.push(r.user_id);
+      /* ── helpers (closure over profile / partner) ── */
+
+      function skeletonHTML() {
+        const card = `
+          <div class="feed-skeleton">
+            <div class="skeleton feed-skeleton-avatar"></div>
+            <div class="feed-skeleton-body">
+              <div class="skeleton feed-skeleton-line feed-skeleton-line--short"></div>
+              <div class="skeleton feed-skeleton-line feed-skeleton-line--long"></div>
+              <div class="skeleton feed-skeleton-line feed-skeleton-line--med"></div>
+            </div>
+          </div>`;
+        return card + card + card;
       }
-      for (const { entry_id, emoji, users } of Object.values(grouped)) {
-        const entryEl = document.querySelector(`[data-entry-id="${entry_id}"]`);
-        if (!entryEl) continue;
-        const reactionsEl = entryEl.querySelector('.entry-reactions');
-        const count    = users.length;
-        const iReacted = users.includes(profile.id);
-        const existing = Array.from(reactionsEl.querySelectorAll('.react-btn'))
-          .find(b => b.querySelector('span') && b.textContent.trimStart().startsWith(emoji));
-        if (existing) {
-          existing.querySelector('span').textContent = count;
-          if (iReacted) existing.classList.add('reacted');
-        } else {
-          const btn = document.createElement('button');
-          btn.className = 'react-btn' + (iReacted ? ' reacted' : '');
-          btn.innerHTML = `${emoji} <span>${count}</span>`;
-          btn.onclick = () => addReaction(btn, emoji);
-          const addBtn = reactionsEl.querySelector('.react-btn--add');
-          reactionsEl.insertBefore(btn, addBtn);
+
+      function populateReactionCounts(reactions) {
+        const grouped = {};
+        for (const r of reactions) {
+          const key = `${r.entry_id}::${r.emoji}`;
+          if (!grouped[key]) grouped[key] = { entry_id: r.entry_id, emoji: r.emoji, users: [] };
+          grouped[key].users.push(r.user_id);
+        }
+        for (const { entry_id, emoji, users } of Object.values(grouped)) {
+          const entryEl = document.querySelector(`[data-entry-id="${entry_id}"]`);
+          if (!entryEl) continue;
+          const reactionsEl = entryEl.querySelector('.entry-reactions');
+          const count    = users.length;
+          const iReacted = users.includes(profile.id);
+          const existing = Array.from(reactionsEl.querySelectorAll('.react-btn'))
+            .find(b => b.querySelector('span') && b.textContent.trimStart().startsWith(emoji));
+          if (existing) {
+            existing.querySelector('span').textContent = count;
+            if (iReacted) existing.classList.add('reacted');
+          } else {
+            const btn = document.createElement('button');
+            btn.className = 'react-btn' + (iReacted ? ' reacted' : '');
+            btn.innerHTML = `${emoji} <span>${count}</span>`;
+            btn.onclick = () => addReaction(btn, emoji);
+            const addBtn = reactionsEl.querySelector('.react-btn--add');
+            reactionsEl.insertBefore(btn, addBtn);
+          }
         }
       }
-    }
 
-    /* ── feed ── */
-    async function loadFeed() {
-      const feed = document.getElementById('feed');
-      feed.innerHTML = skeletonHTML();
+      async function loadFeed() {
+        const feed = document.getElementById('feed');
+        feed.innerHTML = skeletonHTML();
 
-      const { data: entries, error } = await supabase
-        .from('feed_entries')
-        .select(`
-          id, user_id, entry_type, title,
-          kcal, protein_g, carbs_g, fat_g,
-          duration_min, distance_km, logged_at,
-          profile:profiles(display_name, initials)
-        `)
-        .eq('couple_id', profile.couple_id)
-        .order('logged_at', { ascending: false })
-        .limit(50);
-
-      feed.innerHTML = '';
-
-      if (error || !entries?.length) {
-        feed.innerHTML = `
-          <div class="feed-empty">
-            <div class="feed-empty-icon">🥗</div>
-            <div class="feed-empty-title">Nothing here yet</div>
-            <p class="feed-empty-body">Log your first meal or workout to start your shared feed.</p>
-          </div>`;
-        return;
-      }
-
-      entries.forEach((row, i) => {
-        const el = buildEntryFromRow(row, profile.id);
-        if (!el) return;
-        el.style.animationDelay = `${i * 60}ms`;
-        feed.appendChild(el);
-      });
-
-      // Overlay existing reaction counts from the DB
-      const { data: reactions } = await supabase
-        .from('reactions')
-        .select('entry_id, user_id, emoji')
-        .in('entry_id', entries.map(e => e.id));
-      if (reactions?.length) populateReactionCounts(reactions);
-    }
-
-    /* ── daily summary bars ── */
-    async function loadSummary() {
-      const now   = new Date();
-      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-      const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
-
-      const { data: entries } = await supabase
-        .from('feed_entries')
-        .select('user_id, kcal')
-        .eq('couple_id', profile.couple_id)
-        .eq('entry_type', 'meal')
-        .gte('logged_at', start)
-        .lt('logged_at', end);
-
-      const sum = (uid) =>
-        (entries || []).filter(e => e.user_id === uid).reduce((s, e) => s + (e.kcal || 0), 0);
-
-      const myKcal      = sum(profile.id);
-      const partnerKcal = partner ? sum(partner.id) : 0;
-      const pct         = (v) => `${Math.min(100, Math.round((v / DAILY_KCAL_GOAL) * 100))}%`;
-
-      document.getElementById('summary-label-me').textContent      = `${profile.display_name} · calories`;
-      document.getElementById('summary-bar-me').style.width        = pct(myKcal);
-      document.getElementById('summary-val-me').textContent        = `${myKcal.toLocaleString()} / ${DAILY_KCAL_GOAL.toLocaleString()} kcal`;
-
-      const partnerName = partner?.display_name ?? 'Partner';
-      document.getElementById('summary-label-partner').textContent = `${partnerName} · calories`;
-      document.getElementById('summary-bar-partner').style.width   = pct(partnerKcal);
-      document.getElementById('summary-val-partner').textContent   = `${partnerKcal.toLocaleString()} / ${DAILY_KCAL_GOAL.toLocaleString()} kcal`;
-    }
-
-    /* ── couple score (last 7 days) ── */
-    async function updateCoupleScore() {
-      const since = new Date();
-      since.setDate(since.getDate() - 7);
-
-      const { count } = await supabase
-        .from('feed_entries')
-        .select('id', { count: 'exact', head: true })
-        .eq('couple_id', profile.couple_id)
-        .gte('logged_at', since.toISOString());
-
-      const score = Math.min(100, Math.round(((count || 0) / WEEKLY_ENTRIES_MAX) * 100));
-      const el    = document.getElementById('sidebar-score');
-      if (el) el.textContent = score;
-    }
-
-    /* ── init ── */
-    try {
-    const profile = await guardSession();
-    if (!profile) return;
-
-    if (!profile.couple_id) {
-      window.location.replace('pair.html');
-      return;
-    }
-
-    // Fetch partner (may be null if they haven't joined yet)
-    const { data: partnerRow } = await supabase
-      .from('profiles')
-      .select('id, display_name, initials')
-      .eq('couple_id', profile.couple_id)
-      .neq('id', profile.id)
-      .maybeSingle();
-    const partner = partnerRow;
-
-    // Expose to feed.js (classic script, needs these via global)
-    window.__f42 = {
-      supabase,
-      profile,
-      partner,
-      reloadFeed:    loadFeed,
-      reloadSummary: loadSummary,
-    };
-
-    await Promise.all([
-      populateSidebar(profile),
-      loadFeed(),
-      loadSummary(),
-      updateCoupleScore(),
-    ]);
-
-    } catch (err) {
-      console.error('F42 feed init error:', err);
-    } finally {
-      document.body.style.visibility = 'visible';
-    }
-
-    /* ── Phase 5: real-time subscriptions ── */
-    const feedEl = document.getElementById('feed');
-
-    // New entries from either partner appear instantly
-    supabase
-      .channel('rt-feed-entries')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'feed_entries',
-        filter: `couple_id=eq.${profile.couple_id}`,
-      }, async (payload) => {
-        // Re-fetch with the profile join that the realtime payload lacks
-        const { data: row } = await supabase
+        const { data: entries, error } = await supabase
           .from('feed_entries')
           .select(`
             id, user_id, entry_type, title,
@@ -1025,72 +890,206 @@ body::before {
             duration_min, distance_km, logged_at,
             profile:profiles(display_name, initials)
           `)
-          .eq('id', payload.new.id)
-          .single();
-        if (!row) return;
+          .eq('couple_id', profile.couple_id)
+          .order('logged_at', { ascending: false })
+          .limit(50);
 
-        // Clear empty / loading placeholder if present
-        const placeholder = feedEl.querySelector('.feed-empty, .feed-loading');
-        if (placeholder) placeholder.remove();
+        feed.innerHTML = '';
 
-        const el = buildEntryFromRow(row, profile.id);
-        el.style.animationDelay = '0ms';
-        feedEl.prepend(el);
-
-        if (row.entry_type === 'meal') await loadSummary();
-        await updateCoupleScore();
-      })
-      .subscribe();
-
-    // Reaction counts update live on partner's screen
-    supabase
-      .channel('rt-reactions')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'reactions',
-      }, (payload) => {
-        const { entry_id, user_id, emoji } = payload.new;
-        if (user_id === profile.id) return; // own action already applied optimistically
-        const entryEl = feedEl.querySelector(`[data-entry-id="${entry_id}"]`);
-        if (!entryEl) return;
-        const reactionsEl = entryEl.querySelector('.entry-reactions');
-        const existing = Array.from(reactionsEl.querySelectorAll('.react-btn'))
-          .find(b => b.querySelector('span') && b.textContent.trimStart().startsWith(emoji));
-        if (existing) {
-          const span = existing.querySelector('span');
-          span.textContent = parseInt(span.textContent, 10) + 1;
-        } else {
-          const btn = document.createElement('button');
-          btn.className = 'react-btn';
-          btn.innerHTML = `${emoji} <span>1</span>`;
-          btn.onclick = () => addReaction(btn, emoji);
-          reactionsEl.insertBefore(btn, reactionsEl.querySelector('.react-btn--add'));
+        if (error || !entries?.length) {
+          feed.innerHTML = `
+            <div class="feed-empty">
+              <div class="feed-empty-icon">🥗</div>
+              <div class="feed-empty-title">Nothing here yet</div>
+              <p class="feed-empty-body">Log your first meal or workout to start your shared feed.</p>
+            </div>`;
+          return;
         }
-      })
-      .on('postgres_changes', {
-        event: 'DELETE',
-        schema: 'public',
-        table: 'reactions',
-      }, (payload) => {
-        const { entry_id, user_id, emoji } = payload.old;
-        if (user_id === profile.id) return;
-        const entryEl = feedEl.querySelector(`[data-entry-id="${entry_id}"]`);
-        if (!entryEl) return;
-        const reactionsEl = entryEl.querySelector('.entry-reactions');
-        const btn = Array.from(reactionsEl.querySelectorAll('.react-btn'))
-          .find(b => b.querySelector('span') && b.textContent.trimStart().startsWith(emoji));
-        if (!btn) return;
-        const span = btn.querySelector('span');
-        const newCount = parseInt(span.textContent, 10) - 1;
-        // Preset buttons (🔥 ❤️) stay visible at 0; custom emoji buttons are removed
-        if (newCount <= 0 && !btn.hasAttribute('data-preset')) {
-          btn.remove();
-        } else {
-          span.textContent = Math.max(0, newCount);
+
+        entries.forEach((row, i) => {
+          const el = buildEntryFromRow(row, profile.id);
+          if (!el) return;
+          el.style.animationDelay = `${i * 60}ms`;
+          feed.appendChild(el);
+        });
+
+        const { data: reactions } = await supabase
+          .from('reactions')
+          .select('entry_id, user_id, emoji')
+          .in('entry_id', entries.map(e => e.id));
+        if (reactions?.length) populateReactionCounts(reactions);
+      }
+
+      async function loadSummary() {
+        const now   = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+        const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+
+        const { data: entries } = await supabase
+          .from('feed_entries')
+          .select('user_id, kcal')
+          .eq('couple_id', profile.couple_id)
+          .eq('entry_type', 'meal')
+          .gte('logged_at', start)
+          .lt('logged_at', end);
+
+        const sum = (uid) =>
+          (entries || []).filter(e => e.user_id === uid).reduce((s, e) => s + (e.kcal || 0), 0);
+
+        const myKcal      = sum(profile.id);
+        const partnerKcal = partner ? sum(partner.id) : 0;
+        const pct         = (v) => `${Math.min(100, Math.round((v / DAILY_KCAL_GOAL) * 100))}%`;
+
+        document.getElementById('summary-label-me').textContent      = `${profile.display_name} · calories`;
+        document.getElementById('summary-bar-me').style.width        = pct(myKcal);
+        document.getElementById('summary-val-me').textContent        = `${myKcal.toLocaleString()} / ${DAILY_KCAL_GOAL.toLocaleString()} kcal`;
+
+        const partnerName = partner?.display_name ?? 'Partner';
+        document.getElementById('summary-label-partner').textContent = `${partnerName} · calories`;
+        document.getElementById('summary-bar-partner').style.width   = pct(partnerKcal);
+        document.getElementById('summary-val-partner').textContent   = `${partnerKcal.toLocaleString()} / ${DAILY_KCAL_GOAL.toLocaleString()} kcal`;
+      }
+
+      async function updateCoupleScore() {
+        const since = new Date();
+        since.setDate(since.getDate() - 7);
+
+        const { count } = await supabase
+          .from('feed_entries')
+          .select('id', { count: 'exact', head: true })
+          .eq('couple_id', profile.couple_id)
+          .gte('logged_at', since.toISOString());
+
+        const score = Math.min(100, Math.round(((count || 0) / WEEKLY_ENTRIES_MAX) * 100));
+        const el    = document.getElementById('sidebar-score');
+        if (el) el.textContent = score;
+      }
+
+      /* ── init ── */
+
+      try {
+        profile = await guardSession();
+        if (!profile) return;
+
+        if (!profile.couple_id) {
+          window.location.replace('pair.html');
+          return;
         }
-      })
-      .subscribe();
+
+        const { data: partnerRow } = await supabase
+          .from('profiles')
+          .select('id, display_name, initials')
+          .eq('couple_id', profile.couple_id)
+          .neq('id', profile.id)
+          .maybeSingle();
+        partner = partnerRow;
+
+        window.__f42 = {
+          supabase,
+          profile,
+          partner,
+          reloadFeed:    loadFeed,
+          reloadSummary: loadSummary,
+        };
+
+        await Promise.all([
+          populateSidebar(profile),
+          loadFeed(),
+          loadSummary(),
+          updateCoupleScore(),
+        ]);
+
+      } catch (err) {
+        console.error('F42 feed init error:', err);
+      } finally {
+        document.body.style.visibility = 'visible';
+      }
+
+      /* ── real-time subscriptions ── */
+
+      const feedEl = document.getElementById('feed');
+
+      supabase
+        .channel('rt-feed-entries')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'feed_entries',
+          filter: `couple_id=eq.${profile.couple_id}`,
+        }, async (payload) => {
+          const { data: row } = await supabase
+            .from('feed_entries')
+            .select(`
+              id, user_id, entry_type, title,
+              kcal, protein_g, carbs_g, fat_g,
+              duration_min, distance_km, logged_at,
+              profile:profiles(display_name, initials)
+            `)
+            .eq('id', payload.new.id)
+            .single();
+          if (!row) return;
+
+          const placeholder = feedEl.querySelector('.feed-empty, .feed-loading');
+          if (placeholder) placeholder.remove();
+
+          const el = buildEntryFromRow(row, profile.id);
+          if (!el) return;
+          el.style.animationDelay = '0ms';
+          feedEl.prepend(el);
+
+          if (row.entry_type === 'meal') await loadSummary();
+          await updateCoupleScore();
+        })
+        .subscribe();
+
+      supabase
+        .channel('rt-reactions')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'reactions',
+        }, (payload) => {
+          const { entry_id, user_id, emoji } = payload.new;
+          if (user_id === profile.id) return;
+          const entryEl = feedEl.querySelector(`[data-entry-id="${entry_id}"]`);
+          if (!entryEl) return;
+          const reactionsEl = entryEl.querySelector('.entry-reactions');
+          const existing = Array.from(reactionsEl.querySelectorAll('.react-btn'))
+            .find(b => b.querySelector('span') && b.textContent.trimStart().startsWith(emoji));
+          if (existing) {
+            const span = existing.querySelector('span');
+            span.textContent = parseInt(span.textContent, 10) + 1;
+          } else {
+            const btn = document.createElement('button');
+            btn.className = 'react-btn';
+            btn.innerHTML = `${emoji} <span>1</span>`;
+            btn.onclick = () => addReaction(btn, emoji);
+            reactionsEl.insertBefore(btn, reactionsEl.querySelector('.react-btn--add'));
+          }
+        })
+        .on('postgres_changes', {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'reactions',
+        }, (payload) => {
+          const { entry_id, user_id, emoji } = payload.old;
+          if (user_id === profile.id) return;
+          const entryEl = feedEl.querySelector(`[data-entry-id="${entry_id}"]`);
+          if (!entryEl) return;
+          const reactionsEl = entryEl.querySelector('.entry-reactions');
+          const btn = Array.from(reactionsEl.querySelectorAll('.react-btn'))
+            .find(b => b.querySelector('span') && b.textContent.trimStart().startsWith(emoji));
+          if (!btn) return;
+          const span = btn.querySelector('span');
+          const newCount = parseInt(span.textContent, 10) - 1;
+          if (newCount <= 0 && !btn.hasAttribute('data-preset')) {
+            btn.remove();
+          } else {
+            span.textContent = Math.max(0, newCount);
+          }
+        })
+        .subscribe();
+    })();
   </script>
 </body>
 </html>

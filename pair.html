@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>F42 — Connect with your partner</title>
-  <style>body { visibility: hidden; }</style>
+  <style>
+    body { visibility: hidden; animation: f42show 0s 5s forwards; }
+    @keyframes f42show { to { visibility: visible; } }
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -348,200 +351,194 @@ body::before {
       setTimeout(() => window.location.replace('feed.html'), 2200);
     }
 
-    /* ── init ────────────────────────────────────────────────────────────── */
+    /* ── init + event listeners ─────────────────────────────────────────── */
 
-    let profile;
-    try {
-    profile = await guardSession();
-    if (!profile) return;
-
-    let couple = null;
-
-    if (profile.couple_id) {
-      const { data } = await supabase
-        .from('couples')
-        .select('id, user_a_id, user_b_id, invite_code')
-        .eq('id', profile.couple_id)
-        .single();
-      couple = data;
-
-      if (couple?.user_b_id) {
-        // already fully paired
-        window.location.replace('feed.html');
-        return;
-      }
-    }
-
-    if (couple) {
-      // Already created a couple, still waiting
-      document.getElementById('code-display').textContent = formatCode(couple.invite_code);
-      show('state-waiting');
-      startPolling(couple.id);
-    } else {
-      show('state-create');
-    }
-
-    } catch (err) {
-      console.error('F42 pair init error:', err);
-    } finally {
-      document.body.style.visibility = 'visible';
-    }
-
-    /* ── generate code ───────────────────────────────────────────────────── */
-
-    document.getElementById('btn-generate').addEventListener('click', async () => {
-      clearErrors();
-      const btn = document.getElementById('btn-generate');
-      btn.disabled = true;
-      btn.textContent = 'Generating…';
-
-      const code = generateCode();
-
-      const { data: newCouple, error } = await supabase
-        .from('couples')
-        .insert({ user_a_id: profile.id, invite_code: code })
-        .select()
-        .single();
-
-      if (error) {
-        showCreateError(error.message);
-        btn.disabled = false;
-        btn.textContent = 'Generate invite code';
-        return;
-      }
-
-      // Update own profile with couple_id
-      const { error: profileErr } = await supabase
-        .from('profiles')
-        .update({ couple_id: newCouple.id })
-        .eq('id', profile.id);
-
-      if (profileErr) {
-        showCreateError('Failed to save your couple link. Please try again.');
-        btn.disabled = false;
-        btn.textContent = 'Generate invite code';
-        return;
-      }
-
-      document.getElementById('code-display').textContent = formatCode(newCouple.invite_code);
-      show('state-waiting');
-      startPolling(newCouple.id);
-    });
-
-    /* ── join with code ──────────────────────────────────────────────────── */
-
-    async function attemptJoin() {
-      clearErrors();
-      const raw  = document.getElementById('input-join-code').value;
-      const code = normalizeCode(raw);
-
-      if (!code) { showJoinError('Please enter a code.'); return; }
-      if (code.length !== 8) { showJoinError('Codes are 8 characters — check for typos.'); return; }
-
-      const joinBtn = document.getElementById('btn-join');
-      joinBtn.disabled = true;
-      joinBtn.textContent = 'Joining…';
-
-      // Single RPC: handles not_found / used / own correctly even for paired couples
-      // (direct SELECT can't see paired rows due to RLS; SECURITY DEFINER function can)
-      const { data: status, error: rpcErr } = await supabase
-        .rpc('check_invite_code', { p_code: code });
-
-      if (rpcErr || !status) {
-        showJoinError('Something went wrong. Please try again.');
-        joinBtn.disabled = false;
-        joinBtn.textContent = 'Join';
-        return;
-      }
-
-      const errorMessages = {
-        not_found: 'Code not found. Check it and try again.',
-        used:      'This code has already been used.',
-        own:       'This is your own invite code. Share it with your partner.',
-      };
-      if (errorMessages[status]) {
-        showJoinError(errorMessages[status]);
-        joinBtn.disabled = false;
-        joinBtn.textContent = 'Join';
-        return;
-      }
-
-      // status === 'available' — fetch the row (visible via couples_select_unpaired policy)
-      const { data: rows } = await supabase
-        .from('couples')
-        .select('id')
-        .eq('invite_code', code)
-        .is('user_b_id', null);
-
-      if (!rows?.length) {
-        // Race condition: someone else claimed it between the RPC check and now
-        showJoinError('This code has already been used.');
-        joinBtn.disabled = false;
-        joinBtn.textContent = 'Join';
-        return;
-      }
-
-      const { error: updateErr } = await supabase
-        .from('couples')
-        .update({ user_b_id: profile.id })
-        .eq('id', rows[0].id)
-        .is('user_b_id', null); // atomic: fails if already claimed
-
-      if (updateErr) {
-        showJoinError('This code has already been used.');
-        joinBtn.disabled = false;
-        joinBtn.textContent = 'Join';
-        return;
-      }
-
-      const { error: joinProfileErr } = await supabase
-        .from('profiles')
-        .update({ couple_id: rows[0].id })
-        .eq('id', profile.id);
-
-      if (joinProfileErr) {
-        showJoinError('Failed to save your couple link. Please try again.');
-        joinBtn.disabled = false;
-        joinBtn.textContent = 'Join';
-        return;
-      }
-
-      window.location.replace('feed.html');
-    }
-
-    document.getElementById('btn-join').addEventListener('click', attemptJoin);
-    document.getElementById('input-join-code').addEventListener('keydown', e => {
-      if (e.key === 'Enter') attemptJoin();
-    });
-
-    document.getElementById('btn-switch-account').addEventListener('click', async (e) => {
-      e.preventDefault();
-      await signOut();
-    });
-
-    /* ── copy button ─────────────────────────────────────────────────────── */
-
-    document.getElementById('btn-copy').addEventListener('click', async () => {
-      const code = document.getElementById('code-display').textContent;
+    (async () => {
+      let profile;
       try {
-        await navigator.clipboard.writeText(code);
-      } catch {
-        // fallback for http contexts
-        const ta = document.createElement('textarea');
-        ta.value = code;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        ta.remove();
+        profile = await guardSession();
+        if (!profile) return;
+
+        let couple = null;
+
+        if (profile.couple_id) {
+          const { data } = await supabase
+            .from('couples')
+            .select('id, user_a_id, user_b_id, invite_code')
+            .eq('id', profile.couple_id)
+            .single();
+          couple = data;
+
+          if (couple?.user_b_id) {
+            window.location.replace('feed.html');
+            return;
+          }
+        }
+
+        if (couple) {
+          document.getElementById('code-display').textContent = formatCode(couple.invite_code);
+          show('state-waiting');
+          startPolling(couple.id);
+        } else {
+          show('state-create');
+        }
+
+      } catch (err) {
+        console.error('F42 pair init error:', err);
+      } finally {
+        document.body.style.visibility = 'visible';
       }
-      const btn = document.getElementById('btn-copy');
-      btn.textContent = '✓ Copied!';
-      btn.classList.add('copied');
-      setTimeout(() => {
-        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Copy code`;
-        btn.classList.remove('copied');
-      }, 2000);
-    });
+
+      /* ── generate code ── */
+
+      document.getElementById('btn-generate').addEventListener('click', async () => {
+        clearErrors();
+        const btn = document.getElementById('btn-generate');
+        btn.disabled = true;
+        btn.textContent = 'Generating…';
+
+        const code = generateCode();
+
+        const { data: newCouple, error } = await supabase
+          .from('couples')
+          .insert({ user_a_id: profile.id, invite_code: code })
+          .select()
+          .single();
+
+        if (error) {
+          showCreateError(error.message);
+          btn.disabled = false;
+          btn.textContent = 'Generate invite code';
+          return;
+        }
+
+        const { error: profileErr } = await supabase
+          .from('profiles')
+          .update({ couple_id: newCouple.id })
+          .eq('id', profile.id);
+
+        if (profileErr) {
+          showCreateError('Failed to save your couple link. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Generate invite code';
+          return;
+        }
+
+        document.getElementById('code-display').textContent = formatCode(newCouple.invite_code);
+        show('state-waiting');
+        startPolling(newCouple.id);
+      });
+
+      /* ── join with code ── */
+
+      async function attemptJoin() {
+        clearErrors();
+        const raw  = document.getElementById('input-join-code').value;
+        const code = normalizeCode(raw);
+
+        if (!code) { showJoinError('Please enter a code.'); return; }
+        if (code.length !== 8) { showJoinError('Codes are 8 characters — check for typos.'); return; }
+
+        const joinBtn = document.getElementById('btn-join');
+        joinBtn.disabled = true;
+        joinBtn.textContent = 'Joining…';
+
+        const { data: status, error: rpcErr } = await supabase
+          .rpc('check_invite_code', { p_code: code });
+
+        if (rpcErr || !status) {
+          showJoinError('Something went wrong. Please try again.');
+          joinBtn.disabled = false;
+          joinBtn.textContent = 'Join';
+          return;
+        }
+
+        const errorMessages = {
+          not_found: 'Code not found. Check it and try again.',
+          used:      'This code has already been used.',
+          own:       'This is your own invite code. Share it with your partner.',
+        };
+        if (errorMessages[status]) {
+          showJoinError(errorMessages[status]);
+          joinBtn.disabled = false;
+          joinBtn.textContent = 'Join';
+          return;
+        }
+
+        const { data: rows } = await supabase
+          .from('couples')
+          .select('id')
+          .eq('invite_code', code)
+          .is('user_b_id', null);
+
+        if (!rows?.length) {
+          showJoinError('This code has already been used.');
+          joinBtn.disabled = false;
+          joinBtn.textContent = 'Join';
+          return;
+        }
+
+        const { error: updateErr } = await supabase
+          .from('couples')
+          .update({ user_b_id: profile.id })
+          .eq('id', rows[0].id)
+          .is('user_b_id', null);
+
+        if (updateErr) {
+          showJoinError('This code has already been used.');
+          joinBtn.disabled = false;
+          joinBtn.textContent = 'Join';
+          return;
+        }
+
+        const { error: joinProfileErr } = await supabase
+          .from('profiles')
+          .update({ couple_id: rows[0].id })
+          .eq('id', profile.id);
+
+        if (joinProfileErr) {
+          showJoinError('Failed to save your couple link. Please try again.');
+          joinBtn.disabled = false;
+          joinBtn.textContent = 'Join';
+          return;
+        }
+
+        window.location.replace('feed.html');
+      }
+
+      document.getElementById('btn-join').addEventListener('click', attemptJoin);
+      document.getElementById('input-join-code').addEventListener('keydown', e => {
+        if (e.key === 'Enter') attemptJoin();
+      });
+
+      document.getElementById('btn-switch-account').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await signOut();
+      });
+
+      /* ── copy button ── */
+
+      document.getElementById('btn-copy').addEventListener('click', async () => {
+        const code = document.getElementById('code-display').textContent;
+        try {
+          await navigator.clipboard.writeText(code);
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = code;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        const btn = document.getElementById('btn-copy');
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Copy code`;
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    })();
   </script>
 </body>
 </html>
