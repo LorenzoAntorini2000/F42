@@ -169,7 +169,11 @@ body::before {
         .select('couple_id')
         .eq('id', session.user.id)
         .single();
-      window.location.replace(profile?.couple_id ? 'feed.html' : 'pair.html');
+      if (profile) {
+        window.location.replace(profile.couple_id ? 'feed.html' : 'pair.html');
+      } else {
+        await supabase.auth.signOut();
+      }
     }
 
     const btn   = document.getElementById('btn-login');

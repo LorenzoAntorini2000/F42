@@ -17,6 +17,7 @@ export async function guardSession() {
     .single();
 
   if (!profile) {
+    await supabase.auth.signOut();
     window.location.replace('login.html');
     return null;
   }
