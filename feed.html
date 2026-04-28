@@ -700,6 +700,34 @@ body::before {
   font-size: 0.875rem; font-weight: 500;
 }
 
+/* ── Skeleton loading ── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(148,163,184,0.10) 25%,
+    rgba(148,163,184,0.20) 50%,
+    rgba(148,163,184,0.10) 75%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+.feed-skeleton {
+  display: flex; gap: 0.875rem;
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 1.125rem;
+  backdrop-filter: blur(12px); box-shadow: var(--shadow-sm);
+}
+.feed-skeleton-avatar { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; }
+.feed-skeleton-body   { flex: 1; display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+.feed-skeleton-line   { height: 10px; }
+.feed-skeleton-line--short { width: 38%; }
+.feed-skeleton-line--med   { width: 60%; }
+.feed-skeleton-line--long  { width: 82%; }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .app-shell { grid-template-columns: 1fr; }
@@ -800,6 +828,20 @@ body::before {
     const DAILY_KCAL_GOAL    = 2000;
     const WEEKLY_ENTRIES_MAX = 14;
 
+    /* ── skeleton placeholder ── */
+    function skeletonHTML() {
+      const card = `
+        <div class="feed-skeleton">
+          <div class="skeleton feed-skeleton-avatar"></div>
+          <div class="feed-skeleton-body">
+            <div class="skeleton feed-skeleton-line feed-skeleton-line--short"></div>
+            <div class="skeleton feed-skeleton-line feed-skeleton-line--long"></div>
+            <div class="skeleton feed-skeleton-line feed-skeleton-line--med"></div>
+          </div>
+        </div>`;
+      return card + card + card;
+    }
+
     /* ── reaction counts on initial load ── */
     function populateReactionCounts(reactions) {
       const grouped = {};
@@ -833,7 +875,7 @@ body::before {
     /* ── feed ── */
     async function loadFeed() {
       const feed = document.getElementById('feed');
-      feed.innerHTML = '<div class="feed-loading">Loading feed…</div>';
+      feed.innerHTML = skeletonHTML();
 
       const { data: entries, error } = await supabase
         .from('feed_entries')

@@ -419,8 +419,8 @@ body::before {
 
     async function attemptJoin() {
       clearErrors();
-      const raw   = document.getElementById('input-join-code').value;
-      const code  = normalizeCode(raw);
+      const raw  = document.getElementById('input-join-code').value;
+      const code = normalizeCode(raw);
 
       if (!code) { showJoinError('Please enter a code.'); return; }
       if (code.length !== 8) { showJoinError('Codes are 8 characters — check for typos.'); return; }
@@ -429,44 +429,50 @@ body::before {
       joinBtn.disabled = true;
       joinBtn.textContent = 'Joining…';
 
-      // Look up the couple
+      // Single RPC: handles not_found / used / own correctly even for paired couples
+      // (direct SELECT can't see paired rows due to RLS; SECURITY DEFINER function can)
+      const { data: status, error: rpcErr } = await supabase
+        .rpc('check_invite_code', { p_code: code });
+
+      if (rpcErr || !status) {
+        showJoinError('Something went wrong. Please try again.');
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join';
+        return;
+      }
+
+      const errorMessages = {
+        not_found: 'Code not found. Check it and try again.',
+        used:      'This code has already been used.',
+        own:       'This is your own invite code. Share it with your partner.',
+      };
+      if (errorMessages[status]) {
+        showJoinError(errorMessages[status]);
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join';
+        return;
+      }
+
+      // status === 'available' — fetch the row (visible via couples_select_unpaired policy)
       const { data: rows } = await supabase
         .from('couples')
-        .select('id, user_a_id, user_b_id')
+        .select('id')
         .eq('invite_code', code)
         .is('user_b_id', null);
 
-      if (!rows || rows.length === 0) {
-        const { data: usedRows } = await supabase
-          .from('couples')
-          .select('id')
-          .eq('invite_code', code);
-
-        const msg = usedRows?.length
-          ? 'This code has already been used.'
-          : 'Code not found. Check it and try again.';
-
-        showJoinError(msg);
+      if (!rows?.length) {
+        // Race condition: someone else claimed it between the RPC check and now
+        showJoinError('This code has already been used.');
         joinBtn.disabled = false;
         joinBtn.textContent = 'Join';
         return;
       }
 
-      const target = rows[0];
-
-      if (target.user_a_id === profile.id) {
-        showJoinError('This is your own invite code. Share it with your partner.');
-        joinBtn.disabled = false;
-        joinBtn.textContent = 'Join';
-        return;
-      }
-
-      // Claim the spot
       const { error: updateErr } = await supabase
         .from('couples')
         .update({ user_b_id: profile.id })
-        .eq('id', target.id)
-        .is('user_b_id', null);
+        .eq('id', rows[0].id)
+        .is('user_b_id', null); // atomic: fails if already claimed
 
       if (updateErr) {
         showJoinError('This code has already been used.');
@@ -475,10 +481,9 @@ body::before {
         return;
       }
 
-      // Update own profile
       await supabase
         .from('profiles')
-        .update({ couple_id: target.id })
+        .update({ couple_id: rows[0].id })
         .eq('id', profile.id);
 
       window.location.replace('feed.html');
