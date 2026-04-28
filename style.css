@@ -1,5 +1,7 @@
 /* ── F42 · Global & Landing · Soft Modern ── */
 
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+
 :root {
   --bg:           #F0F4FF;
   --bg-card:      #FFFFFF;
@@ -25,8 +27,8 @@
   --radius-md:    18px;
   --radius-lg:    28px;
 
-  --font-display: 'Nunito', system-ui, sans-serif;
-  --font-body:    'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Nunito', 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+  --font-body:    'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
   --shadow-sm:  0 2px 8px rgba(15,23,42,0.06);
   --shadow-md:  0 8px 32px rgba(15,23,42,0.10);
