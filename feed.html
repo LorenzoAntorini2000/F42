@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>F42 — Feed</title>
+  <style>body { visibility: hidden; }</style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -685,6 +686,20 @@ body::before {
 .placeholder-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; }
 .placeholder-body { font-size: 0.9rem; color: var(--text-2); line-height: 1.65; }
 
+/* ── Empty / loading states ── */
+.feed-empty {
+  text-align: center; padding: 3.5rem 1.5rem;
+}
+.feed-empty-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.feed-empty-title {
+  font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem;
+}
+.feed-empty-body { font-size: 0.875rem; color: var(--text-2); line-height: 1.65; }
+.feed-loading {
+  text-align: center; padding: 3rem; color: var(--text-3);
+  font-size: 0.875rem; font-weight: 500;
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .app-shell { grid-template-columns: 1fr; }
@@ -708,12 +723,12 @@ body::before {
       <div class="sidebar-logo">F42</div>
       <div class="couple-card">
         <div class="couple-avatars">
-          <div class="c-avatar c-avatar--a">AL</div>
-          <div class="c-avatar c-avatar--b">MR</div>
+          <div class="c-avatar c-avatar--a" id="sidebar-avatar-me">··</div>
+          <div class="c-avatar c-avatar--b" id="sidebar-avatar-partner">··</div>
         </div>
         <div class="couple-score-wrap">
           <div class="couple-score-label">Couple score</div>
-          <div class="couple-score-val">82</div>
+          <div class="couple-score-val" id="sidebar-score">—</div>
         </div>
       </div>
       <nav class="app-nav">
@@ -730,7 +745,10 @@ body::before {
           Goals
         </a>
       </nav>
-      <a href="index.html" class="sidebar-back">← Back to home</a>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:0.35rem;padding:0 0.5rem;">
+        <a href="index.html" class="sidebar-back" style="margin-top:0;">← Home</a>
+        <button id="btn-signout" class="sidebar-back" style="background:none;border:none;cursor:pointer;text-align:left;color:var(--text-3);padding:0;font-size:0.78rem;font-weight:500;transition:color 0.12s;" onmouseenter="this.style.color='#dc2626'" onmouseleave="this.style.color='var(--text-3)'">Sign out</button>
+      </div>
     </aside>
 
     <main class="app-main">
@@ -741,80 +759,19 @@ body::before {
 
       <div class="daily-summary">
         <div class="summary-card">
-          <div class="summary-label">Alex · calories</div>
-          <div class="summary-bar-wrap"><div class="summary-bar summary-bar--a" style="width:68%"></div></div>
-          <div class="summary-val">1 360 / 2 000 kcal</div>
+          <div class="summary-label" id="summary-label-me">— · calories</div>
+          <div class="summary-bar-wrap"><div class="summary-bar summary-bar--a" id="summary-bar-me" style="width:0%"></div></div>
+          <div class="summary-val" id="summary-val-me">0 / 2 000 kcal</div>
         </div>
         <div class="summary-card">
-          <div class="summary-label">Marco · calories</div>
-          <div class="summary-bar-wrap"><div class="summary-bar summary-bar--b" style="width:82%"></div></div>
-          <div class="summary-val">1 970 / 2 400 kcal</div>
+          <div class="summary-label" id="summary-label-partner">— · calories</div>
+          <div class="summary-bar-wrap"><div class="summary-bar summary-bar--b" id="summary-bar-partner" style="width:0%"></div></div>
+          <div class="summary-val" id="summary-val-partner">0 / 2 000 kcal</div>
         </div>
       </div>
 
       <div class="feed" id="feed">
-        <div class="feed-entry">
-          <div class="entry-avatar entry-avatar--a">AL</div>
-          <div class="entry-body">
-            <div class="entry-header">
-              <span class="entry-who">Alex</span>
-              <span class="entry-type">logged a meal</span>
-              <span class="entry-time">12:34</span>
-            </div>
-            <div class="entry-content">
-              <div class="entry-meal-name">Grilled chicken salad</div>
-              <div class="entry-macros"><span>480 kcal</span><span>42g protein</span><span>18g carbs</span><span>14g fat</span></div>
-            </div>
-            <div class="entry-reactions">
-              <button class="react-btn reacted" onclick="addReaction(this,'🔥')">🔥 <span>1</span></button>
-              <button class="react-btn" onclick="addReaction(this,'❤️')">❤️ <span>0</span></button>
-              <button class="react-btn react-btn--add" onclick="showReactPicker(this)">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="feed-entry">
-          <div class="entry-avatar entry-avatar--b">MR</div>
-          <div class="entry-body">
-            <div class="entry-header">
-              <span class="entry-who">Marco</span>
-              <span class="entry-type">completed a workout</span>
-              <span class="entry-time">08:15</span>
-            </div>
-            <div class="entry-content entry-content--workout">
-              <div class="entry-meal-name">Morning run</div>
-              <div class="entry-workout-stats">
-                <div class="wstat"><div class="wstat-val">5.2</div><div class="wstat-lbl">km</div></div>
-                <div class="wstat"><div class="wstat-val">28</div><div class="wstat-lbl">min</div></div>
-                <div class="wstat"><div class="wstat-val">312</div><div class="wstat-lbl">kcal</div></div>
-              </div>
-            </div>
-            <div class="entry-reactions">
-              <button class="react-btn reacted" onclick="addReaction(this,'🔥')">🔥 <span>2</span></button>
-              <button class="react-btn" onclick="addReaction(this,'👏')">👏 <span>1</span></button>
-              <button class="react-btn react-btn--add" onclick="showReactPicker(this)">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="feed-entry">
-          <div class="entry-avatar entry-avatar--a">AL</div>
-          <div class="entry-body">
-            <div class="entry-header">
-              <span class="entry-who">Alex</span>
-              <span class="entry-type">logged a meal</span>
-              <span class="entry-time">07:45</span>
-            </div>
-            <div class="entry-content">
-              <div class="entry-meal-name">Oat bowl with berries &amp; honey</div>
-              <div class="entry-macros"><span>390 kcal</span><span>12g protein</span><span>62g carbs</span><span>8g fat</span></div>
-            </div>
-            <div class="entry-reactions">
-              <button class="react-btn reacted" onclick="addReaction(this,'❤️')">❤️ <span>1</span></button>
-              <button class="react-btn react-btn--add" onclick="showReactPicker(this)">+</button>
-            </div>
-          </div>
-        </div>
+        <div class="feed-loading">Loading feed…</div>
       </div>
 
       <div class="log-bar">
@@ -836,5 +793,131 @@ body::before {
 
   <script src="main.js"></script>
   <script src="feed.js"></script>
+  <script type="module">
+    import { supabase } from './supabase-client.js';
+    import { guardSession, populateSidebar } from './auth.js';
+
+    const DAILY_KCAL_GOAL    = 2000;
+    const WEEKLY_ENTRIES_MAX = 14;
+
+    /* ── feed ── */
+    async function loadFeed() {
+      const feed = document.getElementById('feed');
+      feed.innerHTML = '<div class="feed-loading">Loading feed…</div>';
+
+      const { data: entries, error } = await supabase
+        .from('feed_entries')
+        .select(`
+          id, user_id, entry_type, title,
+          kcal, protein_g, carbs_g, fat_g,
+          duration_min, distance_km, logged_at,
+          profile:profiles(display_name, initials)
+        `)
+        .eq('couple_id', profile.couple_id)
+        .order('logged_at', { ascending: false })
+        .limit(50);
+
+      feed.innerHTML = '';
+
+      if (error || !entries?.length) {
+        feed.innerHTML = `
+          <div class="feed-empty">
+            <div class="feed-empty-icon">🥗</div>
+            <div class="feed-empty-title">Nothing here yet</div>
+            <p class="feed-empty-body">Log your first meal or workout to start your shared feed.</p>
+          </div>`;
+        return;
+      }
+
+      entries.forEach((row, i) => {
+        const el = buildEntryFromRow(row, profile.id);
+        el.style.animationDelay = `${i * 60}ms`;
+        feed.appendChild(el);
+      });
+    }
+
+    /* ── daily summary bars ── */
+    async function loadSummary() {
+      const now   = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+
+      const { data: entries } = await supabase
+        .from('feed_entries')
+        .select('user_id, kcal')
+        .eq('couple_id', profile.couple_id)
+        .eq('entry_type', 'meal')
+        .gte('logged_at', start)
+        .lt('logged_at', end);
+
+      const sum = (uid) =>
+        (entries || []).filter(e => e.user_id === uid).reduce((s, e) => s + (e.kcal || 0), 0);
+
+      const myKcal      = sum(profile.id);
+      const partnerKcal = partner ? sum(partner.id) : 0;
+      const pct         = (v) => `${Math.min(100, Math.round((v / DAILY_KCAL_GOAL) * 100))}%`;
+
+      document.getElementById('summary-label-me').textContent      = `${profile.display_name} · calories`;
+      document.getElementById('summary-bar-me').style.width        = pct(myKcal);
+      document.getElementById('summary-val-me').textContent        = `${myKcal.toLocaleString()} / ${DAILY_KCAL_GOAL.toLocaleString()} kcal`;
+
+      const partnerName = partner?.display_name ?? 'Partner';
+      document.getElementById('summary-label-partner').textContent = `${partnerName} · calories`;
+      document.getElementById('summary-bar-partner').style.width   = pct(partnerKcal);
+      document.getElementById('summary-val-partner').textContent   = `${partnerKcal.toLocaleString()} / ${DAILY_KCAL_GOAL.toLocaleString()} kcal`;
+    }
+
+    /* ── couple score (last 7 days) ── */
+    async function updateCoupleScore() {
+      const since = new Date();
+      since.setDate(since.getDate() - 7);
+
+      const { count } = await supabase
+        .from('feed_entries')
+        .select('id', { count: 'exact', head: true })
+        .eq('couple_id', profile.couple_id)
+        .gte('logged_at', since.toISOString());
+
+      const score = Math.min(100, Math.round(((count || 0) / WEEKLY_ENTRIES_MAX) * 100));
+      const el    = document.getElementById('sidebar-score');
+      if (el) el.textContent = score;
+    }
+
+    /* ── init ── */
+    const profile = await guardSession();
+    if (!profile) return;
+
+    if (!profile.couple_id) {
+      window.location.replace('pair.html');
+      return;
+    }
+
+    // Fetch partner (may be null if they haven't joined yet)
+    const { data: partnerRow } = await supabase
+      .from('profiles')
+      .select('id, display_name, initials')
+      .eq('couple_id', profile.couple_id)
+      .neq('id', profile.id)
+      .maybeSingle();
+    const partner = partnerRow;
+
+    // Expose to feed.js (classic script, needs these via global)
+    window.__f42 = {
+      supabase,
+      profile,
+      partner,
+      reloadFeed:    loadFeed,
+      reloadSummary: loadSummary,
+    };
+
+    await Promise.all([
+      populateSidebar(profile),
+      loadFeed(),
+      loadSummary(),
+      updateCoupleScore(),
+    ]);
+
+    document.body.style.visibility = 'visible';
+  </script>
 </body>
 </html>

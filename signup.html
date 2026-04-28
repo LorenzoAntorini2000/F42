@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F42 — Create account</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --bg:        #F0F4FF;
+  --bg-card:   #FFFFFF;
+  --green:     #34C77B;
+  --green-lt:  #E8FAF1;
+  --green-dk:  #1A9E5A;
+  --purple:    #7B6CF6;
+  --purple-dk: #5B4ED4;
+  --text-1:    #0F172A;
+  --text-2:    #475569;
+  --text-3:    #94A3B8;
+  --border:    rgba(148,163,184,0.18);
+  --border-md: rgba(148,163,184,0.28);
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --font-display: 'Nunito', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --shadow-sm: 0 2px 8px rgba(15,23,42,0.06);
+  --shadow-lg: 0 24px 64px rgba(15,23,42,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+
+body {
+  background: var(--bg);
+  font-family: var(--font-body);
+  color: var(--text-1);
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 55% at 5% 8%,  rgba(123,108,246,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 92% 15%, rgba(52,199,123,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 55% at 50% 95%, rgba(244,114,182,0.10) 0%, transparent 60%),
+    #F0F4FF;
+  pointer-events: none;
+}
+
+.auth-wrap {
+  width: 100%; max-width: 420px;
+  display: flex; flex-direction: column; gap: 1.5rem;
+}
+
+.auth-logo {
+  text-align: center;
+  font-family: var(--font-display); font-size: 2rem; font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--green-dk), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.auth-card {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(24px);
+}
+
+.auth-title {
+  font-family: var(--font-display); font-size: 1.4rem; font-weight: 800;
+  letter-spacing: -0.02em; margin-bottom: 0.35rem;
+}
+
+.auth-sub {
+  font-size: 0.875rem; color: var(--text-2); margin-bottom: 1.75rem; line-height: 1.5;
+}
+
+.form-group { margin-bottom: 1.1rem; }
+.form-label {
+  display: block; font-size: 0.78rem; font-weight: 600;
+  color: var(--text-2); margin-bottom: 0.4rem; letter-spacing: 0.02em;
+}
+
+.form-input {
+  width: 100%; padding: 0.65rem 0.9rem;
+  border: 1.5px solid var(--border-md); border-radius: var(--radius-sm);
+  background: rgba(248,250,252,0.8);
+  font-family: var(--font-body); font-size: 0.9rem; color: var(--text-1);
+  transition: border-color 0.15s, box-shadow 0.15s; outline: none;
+}
+.form-input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(52,199,123,0.14);
+  background: #fff;
+}
+
+.form-submit {
+  width: 100%; padding: 0.75rem; margin-top: 0.75rem;
+  background: linear-gradient(135deg, var(--green), var(--green-dk));
+  color: #fff; border: none; border-radius: 99px;
+  font-family: var(--font-body); font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 18px rgba(52,199,123,0.28);
+}
+.form-submit:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(52,199,123,0.38); }
+.form-submit:active { transform: scale(0.97); }
+.form-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.auth-error {
+  display: none; margin-top: 1rem; padding: 0.65rem 0.9rem;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.22);
+  border-radius: var(--radius-sm); color: #dc2626;
+  font-size: 0.84rem; font-weight: 500;
+}
+.auth-error.visible { display: block; }
+
+.auth-success {
+  display: none; margin-top: 1rem; padding: 0.65rem 0.9rem;
+  background: rgba(52,199,123,0.10); border: 1px solid rgba(52,199,123,0.28);
+  border-radius: var(--radius-sm); color: var(--green-dk);
+  font-size: 0.84rem; font-weight: 500;
+}
+.auth-success.visible { display: block; }
+
+.auth-footer {
+  text-align: center; font-size: 0.84rem; color: var(--text-2);
+}
+.auth-footer a { color: var(--green-dk); font-weight: 600; text-decoration: none; }
+.auth-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-logo">F42</div>
+
+    <div class="auth-card">
+      <h1 class="auth-title">Create your account</h1>
+      <p class="auth-sub">Join F42 and invite your partner to connect.</p>
+
+      <div class="form-group">
+        <label class="form-label" for="signup-name">Display name</label>
+        <input class="form-input" type="text" id="signup-name" autocomplete="name" placeholder="e.g. Lorenzo" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signup-email">Email</label>
+        <input class="form-input" type="email" id="signup-email" autocomplete="email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signup-password">Password</label>
+        <input class="form-input" type="password" id="signup-password" autocomplete="new-password" placeholder="At least 6 characters" />
+      </div>
+
+      <button class="form-submit" id="btn-signup">Create account</button>
+      <div class="auth-error"   id="signup-error"></div>
+      <div class="auth-success" id="signup-success"></div>
+    </div>
+
+    <p class="auth-footer">
+      Already have an account? <a href="login.html">Sign in →</a>
+    </p>
+  </div>
+
+  <script type="module">
+    import { supabase } from './supabase-client.js';
+    import { computeInitials } from './auth.js';
+
+    // If already signed in, redirect
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('couple_id')
+        .eq('id', session.user.id)
+        .single();
+      window.location.replace(profile?.couple_id ? 'feed.html' : 'pair.html');
+    }
+
+    const btn     = document.getElementById('btn-signup');
+    const errEl   = document.getElementById('signup-error');
+    const succEl  = document.getElementById('signup-success');
+
+    function showError(msg) {
+      errEl.textContent = msg;
+      errEl.classList.add('visible');
+      succEl.classList.remove('visible');
+    }
+
+    btn.addEventListener('click', async () => {
+      const name     = document.getElementById('signup-name').value.trim();
+      const email    = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+
+      errEl.classList.remove('visible');
+      succEl.classList.remove('visible');
+
+      if (!name || !email || !password) { showError('Please fill in all fields.'); return; }
+      if (password.length < 6)          { showError('Password must be at least 6 characters.'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating account…';
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: name,
+            initials: computeInitials(name),
+          },
+        },
+      });
+
+      if (error) {
+        showError(error.message);
+        btn.disabled = false;
+        btn.textContent = 'Create account';
+        return;
+      }
+
+      if (data.session) {
+        // Email confirmation disabled — session returned immediately
+        window.location.replace('pair.html');
+      } else {
+        // Email confirmation required
+        succEl.textContent = 'Account created! Check your email and click the confirmation link, then come back to sign in.';
+        succEl.classList.add('visible');
+        btn.disabled = false;
+        btn.textContent = 'Create account';
+      }
+    });
+  </script>
+</body>
+</html>

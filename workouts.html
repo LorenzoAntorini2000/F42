@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>F42 — Workouts</title>
+  <style>body { visibility: hidden; }</style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -706,12 +707,12 @@ body::before {
       <div class="sidebar-logo">F42</div>
       <div class="couple-card">
         <div class="couple-avatars">
-          <div class="c-avatar c-avatar--a">AL</div>
-          <div class="c-avatar c-avatar--b">MR</div>
+          <div class="c-avatar c-avatar--a" id="sidebar-avatar-me">··</div>
+          <div class="c-avatar c-avatar--b" id="sidebar-avatar-partner">··</div>
         </div>
         <div class="couple-score-wrap">
           <div class="couple-score-label">Couple score</div>
-          <div class="couple-score-val">82</div>
+          <div class="couple-score-val" id="sidebar-score">—</div>
         </div>
       </div>
       <nav class="app-nav">
@@ -728,7 +729,10 @@ body::before {
           Goals
         </a>
       </nav>
-      <a href="index.html" class="sidebar-back">← Back to home</a>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:0.35rem;padding:0 0.5rem;">
+        <a href="index.html" class="sidebar-back" style="margin-top:0;">← Home</a>
+        <button id="btn-signout" class="sidebar-back" style="background:none;border:none;cursor:pointer;text-align:left;color:var(--text-3);padding:0;font-size:0.78rem;font-weight:500;transition:color 0.12s;" onmouseenter="this.style.color='#dc2626'" onmouseleave="this.style.color='var(--text-3)'">Sign out</button>
+      </div>
     </aside>
     <main class="app-main">
       <div class="app-topbar"><h1 class="app-page-title">Workouts</h1></div>
@@ -741,5 +745,13 @@ body::before {
     </main>
   </div>
   <script src="main.js"></script>
+  <script type="module">
+    import { guardSession, populateSidebar } from './auth.js';
+    const profile = await guardSession();
+    if (profile) {
+      await populateSidebar(profile);
+      document.body.style.visibility = 'visible';
+    }
+  </script>
 </body>
 </html>

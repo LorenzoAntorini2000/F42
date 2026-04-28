@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F42 — Connect with your partner</title>
+  <style>body { visibility: hidden; }</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --bg:        #F0F4FF;
+  --bg-card:   #FFFFFF;
+  --green:     #34C77B;
+  --green-lt:  #E8FAF1;
+  --green-dk:  #1A9E5A;
+  --purple:    #7B6CF6;
+  --purple-dk: #5B4ED4;
+  --pink:      #F472B6;
+  --text-1:    #0F172A;
+  --text-2:    #475569;
+  --text-3:    #94A3B8;
+  --border:    rgba(148,163,184,0.18);
+  --border-md: rgba(148,163,184,0.28);
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --font-display: 'Nunito', system-ui, sans-serif;
+  --font-body:    'Plus Jakarta Sans', system-ui, sans-serif;
+  --shadow-sm: 0 2px 8px rgba(15,23,42,0.06);
+  --shadow-lg: 0 24px 64px rgba(15,23,42,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+
+body {
+  background: var(--bg);
+  font-family: var(--font-body);
+  color: var(--text-1);
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem 1.5rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 55% at 5% 8%,  rgba(123,108,246,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 92% 15%, rgba(52,199,123,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 55% at 50% 95%, rgba(244,114,182,0.10) 0%, transparent 60%),
+    #F0F4FF;
+  pointer-events: none;
+}
+
+/* ── Layout ── */
+.pair-wrap {
+  width: 100%; max-width: 460px;
+  display: flex; flex-direction: column; gap: 1.5rem;
+  animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.pair-logo {
+  text-align: center;
+  font-family: var(--font-display); font-size: 2rem; font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--green-dk), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.pair-card {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(24px);
+}
+
+/* ── Section titles ── */
+.pair-title {
+  font-family: var(--font-display); font-size: 1.4rem; font-weight: 800;
+  letter-spacing: -0.02em; margin-bottom: 0.3rem;
+}
+.pair-sub {
+  font-size: 0.875rem; color: var(--text-2); margin-bottom: 1.75rem; line-height: 1.55;
+}
+
+/* ── Create section ── */
+.pair-section { display: flex; flex-direction: column; gap: 0.75rem; }
+.pair-section-label {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-3);
+}
+
+.btn-generate {
+  width: 100%; padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, var(--green), var(--green-dk));
+  color: #fff; border: none; border-radius: 99px;
+  font-family: var(--font-body); font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 18px rgba(52,199,123,0.28);
+}
+.btn-generate:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(52,199,123,0.38); }
+.btn-generate:active { transform: scale(0.97); }
+.btn-generate:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* ── Or divider ── */
+.pair-or {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin: 1.25rem 0; color: var(--text-3); font-size: 0.82rem; font-weight: 500;
+}
+.pair-or::before, .pair-or::after {
+  content: ''; flex: 1; height: 1px; background: var(--border-md);
+}
+
+/* ── Join section ── */
+.join-row { display: flex; gap: 0.5rem; }
+
+.form-input {
+  flex: 1; padding: 0.65rem 0.9rem;
+  border: 1.5px solid var(--border-md); border-radius: var(--radius-sm);
+  background: rgba(248,250,252,0.8);
+  font-family: var(--font-body); font-size: 0.9rem; color: var(--text-1);
+  letter-spacing: 0.05em; text-transform: uppercase;
+  transition: border-color 0.15s, box-shadow 0.15s; outline: none;
+}
+.form-input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(123,108,246,0.14);
+  background: #fff;
+}
+.form-input::placeholder { letter-spacing: 0; text-transform: none; color: var(--text-3); }
+
+.btn-join {
+  padding: 0.65rem 1.25rem;
+  background: linear-gradient(135deg, var(--purple), var(--purple-dk));
+  color: #fff; border: none; border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: 0.875rem; font-weight: 600;
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 14px rgba(123,108,246,0.26); white-space: nowrap;
+}
+.btn-join:hover  { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(123,108,246,0.36); }
+.btn-join:active { transform: scale(0.97); }
+.btn-join:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* ── Errors ── */
+.pair-error {
+  display: none; padding: 0.6rem 0.875rem;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.22);
+  border-radius: var(--radius-sm); color: #dc2626;
+  font-size: 0.84rem; font-weight: 500;
+}
+.pair-error.visible { display: block; }
+
+/* ── Invite code display ── */
+.code-box {
+  background: linear-gradient(135deg, rgba(232,250,241,0.6), rgba(240,238,255,0.6));
+  border: 1.5px solid rgba(52,199,123,0.25);
+  border-radius: var(--radius-md); padding: 1.5rem;
+  text-align: center; margin-bottom: 1rem;
+}
+
+.code-value {
+  font-family: var(--font-display); font-size: 2.4rem; font-weight: 800;
+  letter-spacing: 0.12em; color: var(--text-1);
+  line-height: 1; margin-bottom: 0.9rem;
+}
+
+.btn-copy {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.45rem 1.1rem; border-radius: 99px;
+  border: 1.5px solid var(--border-md); background: rgba(255,255,255,0.8);
+  font-family: var(--font-body); font-size: 0.82rem; font-weight: 600; color: var(--text-2);
+  cursor: pointer; transition: background 0.12s, border-color 0.12s;
+}
+.btn-copy:hover { background: #fff; border-color: var(--green); color: var(--green-dk); }
+.btn-copy.copied { background: var(--green-lt); border-color: rgba(52,199,123,0.4); color: var(--green-dk); }
+
+/* ── Status indicators ── */
+.pair-status {
+  display: flex; align-items: center; gap: 0.65rem;
+  font-size: 0.875rem; font-weight: 500; color: var(--text-2);
+  padding: 0.75rem 0; margin-top: 0.25rem;
+}
+
+.status-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.status-dot--waiting {
+  background: var(--purple);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+.status-dot--connected { background: var(--green); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.45; transform: scale(0.75); }
+}
+
+/* ── Connected celebration ── */
+.connected-state { text-align: center; padding: 1rem 0; }
+.connected-emoji { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
+.connected-title {
+  font-family: var(--font-display); font-size: 1.5rem; font-weight: 800;
+  letter-spacing: -0.02em; margin-bottom: 0.4rem;
+  background: linear-gradient(135deg, var(--green-dk), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.connected-sub { font-size: 0.875rem; color: var(--text-2); }
+
+.pair-footer {
+  text-align: center; font-size: 0.82rem; color: var(--text-3);
+}
+.pair-footer a { color: var(--text-2); font-weight: 500; text-decoration: none; }
+.pair-footer a:hover { color: var(--text-1); }
+  </style>
+</head>
+<body>
+  <div class="pair-wrap">
+    <div class="pair-logo">F42</div>
+
+    <div class="pair-card">
+
+      <!-- STATE A: no couple yet -->
+      <div id="state-create">
+        <h1 class="pair-title">Connect with your partner</h1>
+        <p class="pair-sub">Generate an invite code to share, or enter the code your partner sent you.</p>
+
+        <div class="pair-section">
+          <div class="pair-section-label">Create a code</div>
+          <button class="btn-generate" id="btn-generate">Generate invite code</button>
+          <div class="pair-error" id="create-error"></div>
+        </div>
+
+        <div class="pair-or">or</div>
+
+        <div class="pair-section">
+          <div class="pair-section-label">Enter a code</div>
+          <div class="join-row">
+            <input class="form-input" id="input-join-code" type="text"
+              maxlength="9" placeholder="e.g. ABCD-1234"
+              autocomplete="off" autocorrect="off" spellcheck="false" />
+            <button class="btn-join" id="btn-join">Join</button>
+          </div>
+          <div class="pair-error" id="join-error"></div>
+        </div>
+      </div>
+
+      <!-- STATE B: couple created, waiting for partner -->
+      <div id="state-waiting" style="display:none">
+        <h1 class="pair-title">Share this code</h1>
+        <p class="pair-sub">Send it to your partner via WhatsApp, text, or however you like.</p>
+
+        <div class="code-box">
+          <div class="code-value" id="code-display">····-····</div>
+          <button class="btn-copy" id="btn-copy">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+              <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Copy code
+          </button>
+        </div>
+
+        <div class="pair-status" id="status-waiting">
+          <span class="status-dot status-dot--waiting"></span>
+          Waiting for your partner…
+        </div>
+      </div>
+
+      <!-- STATE C: partner connected -->
+      <div id="state-connected" style="display:none">
+        <div class="connected-state">
+          <span class="connected-emoji">🎉</span>
+          <div class="connected-title">Partner connected!</div>
+          <p class="connected-sub">Your couple is ready. Taking you to the app…</p>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="pair-footer"><a href="login.html">← Sign in with a different account</a></p>
+  </div>
+
+  <script type="module">
+    import { supabase } from './supabase-client.js';
+    import { guardSession } from './auth.js';
+
+    /* ── helpers ────────────────────────────────────────────────────────── */
+
+    function generateCode() {
+      const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O/1/I/L
+      let s = '';
+      for (let i = 0; i < 8; i++) s += chars[Math.floor(Math.random() * chars.length)];
+      return s;
+    }
+
+    const formatCode   = c => c.slice(0, 4) + '-' + c.slice(4);
+    const normalizeCode = s => s.toUpperCase().replace(/[-\s]/g, '');
+
+    function show(id) {
+      ['state-create', 'state-waiting', 'state-connected'].forEach(s => {
+        document.getElementById(s).style.display = s === id ? '' : 'none';
+      });
+    }
+
+    function showCreateError(msg) {
+      const el = document.getElementById('create-error');
+      el.textContent = msg; el.classList.add('visible');
+    }
+
+    function showJoinError(msg) {
+      const el = document.getElementById('join-error');
+      el.textContent = msg; el.classList.add('visible');
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.pair-error').forEach(e => e.classList.remove('visible'));
+    }
+
+    /* ── polling ─────────────────────────────────────────────────────────── */
+
+    let pollTimer = null;
+
+    function startPolling(coupleId) {
+      pollTimer = setInterval(async () => {
+        const { data } = await supabase
+          .from('couples')
+          .select('user_b_id')
+          .eq('id', coupleId)
+          .single();
+        if (data?.user_b_id) partnerConnected();
+      }, 3000);
+    }
+
+    function partnerConnected() {
+      clearInterval(pollTimer);
+      show('state-connected');
+      setTimeout(() => window.location.replace('feed.html'), 2200);
+    }
+
+    /* ── init ────────────────────────────────────────────────────────────── */
+
+    const profile = await guardSession();
+    if (!profile) return;
+
+    let couple = null;
+
+    if (profile.couple_id) {
+      const { data } = await supabase
+        .from('couples')
+        .select('id, user_a_id, user_b_id, invite_code')
+        .eq('id', profile.couple_id)
+        .single();
+      couple = data;
+
+      if (couple?.user_b_id) {
+        // already fully paired
+        window.location.replace('feed.html');
+        return;
+      }
+    }
+
+    document.body.style.visibility = 'visible';
+
+    if (couple) {
+      // Already created a couple, still waiting
+      document.getElementById('code-display').textContent = formatCode(couple.invite_code);
+      show('state-waiting');
+      startPolling(couple.id);
+    } else {
+      show('state-create');
+    }
+
+    /* ── generate code ───────────────────────────────────────────────────── */
+
+    document.getElementById('btn-generate').addEventListener('click', async () => {
+      clearErrors();
+      const btn = document.getElementById('btn-generate');
+      btn.disabled = true;
+      btn.textContent = 'Generating…';
+
+      const code = generateCode();
+
+      const { data: newCouple, error } = await supabase
+        .from('couples')
+        .insert({ user_a_id: profile.id, invite_code: code })
+        .select()
+        .single();
+
+      if (error) {
+        showCreateError(error.message);
+        btn.disabled = false;
+        btn.textContent = 'Generate invite code';
+        return;
+      }
+
+      // Update own profile with couple_id
+      await supabase
+        .from('profiles')
+        .update({ couple_id: newCouple.id })
+        .eq('id', profile.id);
+
+      document.getElementById('code-display').textContent = formatCode(newCouple.invite_code);
+      show('state-waiting');
+      startPolling(newCouple.id);
+    });
+
+    /* ── join with code ──────────────────────────────────────────────────── */
+
+    async function attemptJoin() {
+      clearErrors();
+      const raw   = document.getElementById('input-join-code').value;
+      const code  = normalizeCode(raw);
+
+      if (!code) { showJoinError('Please enter a code.'); return; }
+      if (code.length !== 8) { showJoinError('Codes are 8 characters — check for typos.'); return; }
+
+      const joinBtn = document.getElementById('btn-join');
+      joinBtn.disabled = true;
+      joinBtn.textContent = 'Joining…';
+
+      // Look up the couple
+      const { data: rows } = await supabase
+        .from('couples')
+        .select('id, user_a_id, user_b_id')
+        .eq('invite_code', code)
+        .is('user_b_id', null);
+
+      if (!rows || rows.length === 0) {
+        const { data: usedRows } = await supabase
+          .from('couples')
+          .select('id')
+          .eq('invite_code', code);
+
+        const msg = usedRows?.length
+          ? 'This code has already been used.'
+          : 'Code not found. Check it and try again.';
+
+        showJoinError(msg);
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join';
+        return;
+      }
+
+      const target = rows[0];
+
+      if (target.user_a_id === profile.id) {
+        showJoinError('This is your own invite code. Share it with your partner.');
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join';
+        return;
+      }
+
+      // Claim the spot
+      const { error: updateErr } = await supabase
+        .from('couples')
+        .update({ user_b_id: profile.id })
+        .eq('id', target.id)
+        .is('user_b_id', null);
+
+      if (updateErr) {
+        showJoinError('This code has already been used.');
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join';
+        return;
+      }
+
+      // Update own profile
+      await supabase
+        .from('profiles')
+        .update({ couple_id: target.id })
+        .eq('id', profile.id);
+
+      window.location.replace('feed.html');
+    }
+
+    document.getElementById('btn-join').addEventListener('click', attemptJoin);
+    document.getElementById('input-join-code').addEventListener('keydown', e => {
+      if (e.key === 'Enter') attemptJoin();
+    });
+
+    /* ── copy button ─────────────────────────────────────────────────────── */
+
+    document.getElementById('btn-copy').addEventListener('click', async () => {
+      const code = document.getElementById('code-display').textContent;
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch {
+        // fallback for http contexts
+        const ta = document.createElement('textarea');
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      const btn = document.getElementById('btn-copy');
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Copy code`;
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

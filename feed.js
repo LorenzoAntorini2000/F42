@@ -1,10 +1,11 @@
-/* F42 — feed.js · feed interactions */
+/* F42 — feed.js · feed interactions (classic script, global scope) */
 
-/* ── Reactions ── */
+/* ── Reactions (Phase 4: local DOM only; Phase 5 wires to DB) ── */
+
 function addReaction(btn, emoji) {
-  const countEl = btn.querySelector('span');
+  const countEl  = btn.querySelector('span');
   const isReacted = btn.classList.contains('reacted');
-  const count = parseInt(countEl.textContent, 10);
+  const count    = parseInt(countEl.textContent, 10);
 
   if (isReacted) {
     btn.classList.remove('reacted');
@@ -18,7 +19,6 @@ function addReaction(btn, emoji) {
 const EMOJI_OPTIONS = ['🔥', '❤️', '👏', '💪', '😍', '🥗'];
 
 function showReactPicker(addBtn) {
-  // Remove existing pickers
   document.querySelectorAll('.react-picker').forEach(p => p.remove());
 
   const picker = document.createElement('div');
@@ -37,14 +37,12 @@ function showReactPicker(addBtn) {
     btn.textContent = emoji;
     btn.onclick = () => {
       const reactions = addBtn.closest('.entry-reactions');
-      // Check if this reaction already exists
-      let existing = Array.from(reactions.querySelectorAll('.react-btn'))
+      const existing = Array.from(reactions.querySelectorAll('.react-btn'))
         .find(b => b.textContent.startsWith(emoji));
 
       if (existing && existing !== addBtn) {
         addReaction(existing, emoji);
       } else {
-        // Create a new reaction button before the + button
         const newBtn = document.createElement('button');
         newBtn.className = 'react-btn';
         newBtn.innerHTML = `${emoji} <span>1</span>`;
@@ -58,24 +56,22 @@ function showReactPicker(addBtn) {
   });
 
   addBtn.after(picker);
-
-  // Close on outside click
   setTimeout(() => {
     document.addEventListener('click', () => picker.remove(), { once: true });
   }, 0);
 }
 
 /* ── Log modal ── */
+
 function openLogModal(type) {
   const overlay = document.getElementById('modal-overlay');
-  const title = document.getElementById('modal-title');
-  const body = document.getElementById('modal-body');
+  const title   = document.getElementById('modal-title');
+  const body    = document.getElementById('modal-body');
 
   title.textContent = type === 'meal' ? 'Log a meal' : 'Log a workout';
-  body.innerHTML = type === 'meal' ? mealForm() : workoutForm();
+  body.innerHTML    = type === 'meal' ? mealForm() : workoutForm();
   overlay.classList.add('open');
 
-  // Focus first input
   setTimeout(() => body.querySelector('input')?.focus(), 80);
 }
 
@@ -109,7 +105,7 @@ function mealForm() {
         <input class="form-input" type="number" id="meal-fat" placeholder="15" min="0" />
       </div>
     </div>
-    <button class="form-submit" onclick="submitMeal()">Add to feed</button>
+    <button class="form-submit" id="form-submit-btn" onclick="submitMeal()">Add to feed</button>
   `;
 }
 
@@ -133,66 +129,124 @@ function workoutForm() {
       <label class="form-label">Distance (km, optional)</label>
       <input class="form-input" type="number" id="workout-km" placeholder="5.0" step="0.1" min="0" />
     </div>
-    <button class="form-submit" onclick="submitWorkout()">Add to feed</button>
+    <button class="form-submit" id="form-submit-btn" onclick="submitWorkout()">Add to feed</button>
   `;
 }
 
-function submitMeal() {
-  const name   = document.getElementById('meal-name')?.value.trim();
-  const kcal   = document.getElementById('meal-kcal')?.value;
-  const protein = document.getElementById('meal-protein')?.value;
-  const carbs  = document.getElementById('meal-carbs')?.value;
-  const fat    = document.getElementById('meal-fat')?.value;
+/* ── Submit handlers (write to Supabase, then reload feed) ── */
+
+async function submitMeal() {
+  const name    = document.getElementById('meal-name')?.value.trim();
+  const kcal    = parseInt(document.getElementById('meal-kcal')?.value)    || null;
+  const protein = parseInt(document.getElementById('meal-protein')?.value) || null;
+  const carbs   = parseInt(document.getElementById('meal-carbs')?.value)   || null;
+  const fat     = parseInt(document.getElementById('meal-fat')?.value)     || null;
 
   if (!name) { document.getElementById('meal-name').focus(); return; }
 
-  const now = new Date();
-  const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const btn = document.getElementById('form-submit-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Adding…';
 
-  const macros = [
-    kcal   ? `${kcal} kcal`   : null,
-    protein ? `${protein}g protein` : null,
-    carbs  ? `${carbs}g carbs`  : null,
-    fat    ? `${fat}g fat`     : null,
-  ].filter(Boolean).join(' · ');
+  const { supabase, profile, reloadFeed, reloadSummary } = window.__f42;
 
-  const entry = buildEntry({
-    who: 'Alex', avatar: 'AL', cls: 'a',
-    type: 'logged a meal', time,
-    content: `<div class="entry-meal-name">${escHtml(name)}</div>
-      ${macros ? `<div class="entry-macros"><span>${macros}</span></div>` : ''}`
+  const { error } = await supabase.from('feed_entries').insert({
+    couple_id:  profile.couple_id,
+    user_id:    profile.id,
+    entry_type: 'meal',
+    title:      name,
+    kcal,
+    protein_g:  protein,
+    carbs_g:    carbs,
+    fat_g:      fat,
   });
 
-  prependEntry(entry);
+  if (error) {
+    btn.disabled    = false;
+    btn.textContent = 'Add to feed';
+    console.error('submitMeal:', error);
+    return;
+  }
+
   closeModal();
+  await Promise.all([reloadFeed(), reloadSummary()]);
 }
 
-function submitWorkout() {
+async function submitWorkout() {
   const name = document.getElementById('workout-name')?.value.trim();
-  const min  = document.getElementById('workout-min')?.value;
-  const kcal = document.getElementById('workout-kcal')?.value;
-  const km   = document.getElementById('workout-km')?.value;
+  const min  = parseInt(document.getElementById('workout-min')?.value)   || null;
+  const kcal = parseInt(document.getElementById('workout-kcal')?.value)  || null;
+  const km   = parseFloat(document.getElementById('workout-km')?.value)  || null;
 
   if (!name) { document.getElementById('workout-name').focus(); return; }
 
-  const now = new Date();
-  const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const btn = document.getElementById('form-submit-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Adding…';
 
-  const stats = [
-    km   ? `<div class="wstat"><div class="wstat-val">${km}</div><div class="wstat-lbl">km</div></div>` : '',
-    min  ? `<div class="wstat"><div class="wstat-val">${min}</div><div class="wstat-lbl">min</div></div>` : '',
-    kcal ? `<div class="wstat"><div class="wstat-val">${kcal}</div><div class="wstat-lbl">kcal</div></div>` : '',
-  ].join('');
+  const { supabase, profile, reloadFeed } = window.__f42;
 
-  const entry = buildEntry({
-    who: 'Alex', avatar: 'AL', cls: 'a',
-    type: 'completed a workout', time,
-    content: `<div class="entry-meal-name">${escHtml(name)}</div>
-      ${stats ? `<div class="entry-workout-stats">${stats}</div>` : ''}`
+  const { error } = await supabase.from('feed_entries').insert({
+    couple_id:    profile.couple_id,
+    user_id:      profile.id,
+    entry_type:   'workout',
+    title:        name,
+    duration_min: min,
+    kcal,
+    distance_km:  km,
   });
 
-  prependEntry(entry);
+  if (error) {
+    btn.disabled    = false;
+    btn.textContent = 'Add to feed';
+    console.error('submitWorkout:', error);
+    return;
+  }
+
   closeModal();
+  await reloadFeed();
+}
+
+/* ── Entry rendering ── */
+
+function buildEntryFromRow(row, myId) {
+  const isMe = row.user_id === myId;
+  const cls  = isMe ? 'a' : 'b';
+  const time = new Date(row.logged_at).toLocaleTimeString('en-GB', {
+    hour: '2-digit', minute: '2-digit',
+  });
+
+  let content = `<div class="entry-meal-name">${escHtml(row.title)}</div>`;
+
+  if (row.entry_type === 'meal') {
+    const macros = [
+      row.kcal      ? `${row.kcal} kcal`           : null,
+      row.protein_g ? `${row.protein_g}g protein`   : null,
+      row.carbs_g   ? `${row.carbs_g}g carbs`       : null,
+      row.fat_g     ? `${row.fat_g}g fat`            : null,
+    ].filter(Boolean);
+    if (macros.length) {
+      content += `<div class="entry-macros">${macros.map(m => `<span>${escHtml(m)}</span>`).join('')}</div>`;
+    }
+  } else {
+    const stats = [
+      row.distance_km  ? `<div class="wstat"><div class="wstat-val">${row.distance_km}</div><div class="wstat-lbl">km</div></div>`   : '',
+      row.duration_min ? `<div class="wstat"><div class="wstat-val">${row.duration_min}</div><div class="wstat-lbl">min</div></div>` : '',
+      row.kcal         ? `<div class="wstat"><div class="wstat-val">${row.kcal}</div><div class="wstat-lbl">kcal</div></div>`        : '',
+    ].join('');
+    if (stats) content += `<div class="entry-workout-stats">${stats}</div>`;
+  }
+
+  const el = buildEntry({
+    who:    row.profile.display_name,
+    avatar: row.profile.initials,
+    cls,
+    type:   row.entry_type === 'meal' ? 'logged a meal' : 'completed a workout',
+    time,
+    content,
+  });
+  el.dataset.entryId = row.id;
+  return el;
 }
 
 function buildEntry({ who, avatar, cls, type, time, content }) {
@@ -218,11 +272,6 @@ function buildEntry({ who, avatar, cls, type, time, content }) {
   return div;
 }
 
-function prependEntry(el) {
-  const feed = document.getElementById('feed');
-  feed.insertBefore(el, feed.firstChild);
-}
-
 function escHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -231,7 +280,6 @@ function escHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-// Close modal on Escape
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
 });
