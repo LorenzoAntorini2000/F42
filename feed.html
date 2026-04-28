@@ -800,6 +800,36 @@ body::before {
     const DAILY_KCAL_GOAL    = 2000;
     const WEEKLY_ENTRIES_MAX = 14;
 
+    /* ── reaction counts on initial load ── */
+    function populateReactionCounts(reactions) {
+      const grouped = {};
+      for (const r of reactions) {
+        const key = `${r.entry_id}::${r.emoji}`;
+        if (!grouped[key]) grouped[key] = { entry_id: r.entry_id, emoji: r.emoji, users: [] };
+        grouped[key].users.push(r.user_id);
+      }
+      for (const { entry_id, emoji, users } of Object.values(grouped)) {
+        const entryEl = document.querySelector(`[data-entry-id="${entry_id}"]`);
+        if (!entryEl) continue;
+        const reactionsEl = entryEl.querySelector('.entry-reactions');
+        const count    = users.length;
+        const iReacted = users.includes(profile.id);
+        const existing = Array.from(reactionsEl.querySelectorAll('.react-btn'))
+          .find(b => b.querySelector('span') && b.textContent.trimStart().startsWith(emoji));
+        if (existing) {
+          existing.querySelector('span').textContent = count;
+          if (iReacted) existing.classList.add('reacted');
+        } else {
+          const btn = document.createElement('button');
+          btn.className = 'react-btn' + (iReacted ? ' reacted' : '');
+          btn.innerHTML = `${emoji} <span>${count}</span>`;
+          btn.onclick = () => addReaction(btn, emoji);
+          const addBtn = reactionsEl.querySelector('.react-btn--add');
+          reactionsEl.insertBefore(btn, addBtn);
+        }
+      }
+    }
+
     /* ── feed ── */
     async function loadFeed() {
       const feed = document.getElementById('feed');
@@ -834,6 +864,13 @@ body::before {
         el.style.animationDelay = `${i * 60}ms`;
         feed.appendChild(el);
       });
+
+      // Overlay existing reaction counts from the DB
+      const { data: reactions } = await supabase
+        .from('reactions')
+        .select('entry_id, user_id, emoji')
+        .in('entry_id', entries.map(e => e.id));
+      if (reactions?.length) populateReactionCounts(reactions);
     }
 
     /* ── daily summary bars ── */
@@ -918,6 +955,94 @@ body::before {
     ]);
 
     document.body.style.visibility = 'visible';
+
+    /* ── Phase 5: real-time subscriptions ── */
+    const feedEl = document.getElementById('feed');
+
+    // New entries from either partner appear instantly
+    supabase
+      .channel('rt-feed-entries')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'feed_entries',
+        filter: `couple_id=eq.${profile.couple_id}`,
+      }, async (payload) => {
+        // Re-fetch with the profile join that the realtime payload lacks
+        const { data: row } = await supabase
+          .from('feed_entries')
+          .select(`
+            id, user_id, entry_type, title,
+            kcal, protein_g, carbs_g, fat_g,
+            duration_min, distance_km, logged_at,
+            profile:profiles(display_name, initials)
+          `)
+          .eq('id', payload.new.id)
+          .single();
+        if (!row) return;
+
+        // Clear empty / loading placeholder if present
+        const placeholder = feedEl.querySelector('.feed-empty, .feed-loading');
+        if (placeholder) placeholder.remove();
+
+        const el = buildEntryFromRow(row, profile.id);
+        el.style.animationDelay = '0ms';
+        feedEl.prepend(el);
+
+        if (row.entry_type === 'meal') await loadSummary();
+        await updateCoupleScore();
+      })
+      .subscribe();
+
+    // Reaction counts update live on partner's screen
+    supabase
+      .channel('rt-reactions')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'reactions',
+      }, (payload) => {
+        const { entry_id, user_id, emoji } = payload.new;
+        if (user_id === profile.id) return; // own action already applied optimistically
+        const entryEl = feedEl.querySelector(`[data-entry-id="${entry_id}"]`);
+        if (!entryEl) return;
+        const reactionsEl = entryEl.querySelector('.entry-reactions');
+        const existing = Array.from(reactionsEl.querySelectorAll('.react-btn'))
+          .find(b => b.querySelector('span') && b.textContent.trimStart().startsWith(emoji));
+        if (existing) {
+          const span = existing.querySelector('span');
+          span.textContent = parseInt(span.textContent, 10) + 1;
+        } else {
+          const btn = document.createElement('button');
+          btn.className = 'react-btn';
+          btn.innerHTML = `${emoji} <span>1</span>`;
+          btn.onclick = () => addReaction(btn, emoji);
+          reactionsEl.insertBefore(btn, reactionsEl.querySelector('.react-btn--add'));
+        }
+      })
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'reactions',
+      }, (payload) => {
+        const { entry_id, user_id, emoji } = payload.old;
+        if (user_id === profile.id) return;
+        const entryEl = feedEl.querySelector(`[data-entry-id="${entry_id}"]`);
+        if (!entryEl) return;
+        const reactionsEl = entryEl.querySelector('.entry-reactions');
+        const btn = Array.from(reactionsEl.querySelectorAll('.react-btn'))
+          .find(b => b.querySelector('span') && b.textContent.trimStart().startsWith(emoji));
+        if (!btn) return;
+        const span = btn.querySelector('span');
+        const newCount = parseInt(span.textContent, 10) - 1;
+        // Preset buttons (🔥 ❤️) stay visible at 0; custom emoji buttons are removed
+        if (newCount <= 0 && !btn.hasAttribute('data-preset')) {
+          btn.remove();
+        } else {
+          span.textContent = Math.max(0, newCount);
+        }
+      })
+      .subscribe();
   </script>
 </body>
 </html>

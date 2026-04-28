@@ -1,18 +1,30 @@
 /* F42 — feed.js · feed interactions (classic script, global scope) */
 
-/* ── Reactions (Phase 4: local DOM only; Phase 5 wires to DB) ── */
+/* ── Reactions ── */
 
-function addReaction(btn, emoji) {
-  const countEl  = btn.querySelector('span');
+async function addReaction(btn, emoji) {
+  const countEl   = btn.querySelector('span');
   const isReacted = btn.classList.contains('reacted');
-  const count    = parseInt(countEl.textContent, 10);
+  const count     = parseInt(countEl.textContent, 10);
 
+  // Optimistic DOM update
   if (isReacted) {
     btn.classList.remove('reacted');
     countEl.textContent = Math.max(0, count - 1);
   } else {
     btn.classList.add('reacted');
     countEl.textContent = count + 1;
+  }
+
+  const entryId = btn.closest('[data-entry-id]')?.dataset.entryId;
+  if (!entryId) return;
+
+  const { supabase, profile } = window.__f42;
+  if (isReacted) {
+    await supabase.from('reactions').delete()
+      .eq('entry_id', entryId).eq('user_id', profile.id).eq('emoji', emoji);
+  } else {
+    await supabase.from('reactions').insert({ entry_id: entryId, user_id: profile.id, emoji });
   }
 }
 
@@ -38,17 +50,22 @@ function showReactPicker(addBtn) {
     btn.onclick = () => {
       const reactions = addBtn.closest('.entry-reactions');
       const existing = Array.from(reactions.querySelectorAll('.react-btn'))
-        .find(b => b.textContent.startsWith(emoji));
+        .find(b => b.querySelector('span') && b.textContent.trimStart().startsWith(emoji));
 
       if (existing && existing !== addBtn) {
         addReaction(existing, emoji);
       } else {
+        const entryId = addBtn.closest('[data-entry-id]')?.dataset.entryId;
         const newBtn = document.createElement('button');
-        newBtn.className = 'react-btn';
+        newBtn.className = 'react-btn reacted';
         newBtn.innerHTML = `${emoji} <span>1</span>`;
         newBtn.onclick = () => addReaction(newBtn, emoji);
         reactions.insertBefore(newBtn, addBtn);
-        newBtn.classList.add('reacted');
+
+        if (entryId) {
+          const { supabase, profile } = window.__f42;
+          supabase.from('reactions').insert({ entry_id: entryId, user_id: profile.id, emoji });
+        }
       }
       picker.remove();
     };
@@ -133,7 +150,7 @@ function workoutForm() {
   `;
 }
 
-/* ── Submit handlers (write to Supabase, then reload feed) ── */
+/* ── Submit handlers ── */
 
 async function submitMeal() {
   const name    = document.getElementById('meal-name')?.value.trim();
@@ -148,7 +165,7 @@ async function submitMeal() {
   btn.disabled    = true;
   btn.textContent = 'Adding…';
 
-  const { supabase, profile, reloadFeed, reloadSummary } = window.__f42;
+  const { supabase, profile, reloadSummary } = window.__f42;
 
   const { error } = await supabase.from('feed_entries').insert({
     couple_id:  profile.couple_id,
@@ -169,7 +186,7 @@ async function submitMeal() {
   }
 
   closeModal();
-  await Promise.all([reloadFeed(), reloadSummary()]);
+  await reloadSummary(); // update bars immediately; realtime subscription renders the new entry
 }
 
 async function submitWorkout() {
@@ -184,7 +201,7 @@ async function submitWorkout() {
   btn.disabled    = true;
   btn.textContent = 'Adding…';
 
-  const { supabase, profile, reloadFeed } = window.__f42;
+  const { supabase, profile } = window.__f42;
 
   const { error } = await supabase.from('feed_entries').insert({
     couple_id:    profile.couple_id,
@@ -204,7 +221,7 @@ async function submitWorkout() {
   }
 
   closeModal();
-  await reloadFeed();
+  // realtime subscription renders the new entry and updates couple score
 }
 
 /* ── Entry rendering ── */
@@ -263,8 +280,8 @@ function buildEntry({ who, avatar, cls, type, time, content }) {
       </div>
       <div class="entry-content">${content}</div>
       <div class="entry-reactions">
-        <button class="react-btn" onclick="addReaction(this,'🔥')">🔥 <span>0</span></button>
-        <button class="react-btn" onclick="addReaction(this,'❤️')">❤️ <span>0</span></button>
+        <button class="react-btn" data-preset onclick="addReaction(this,'🔥')">🔥 <span>0</span></button>
+        <button class="react-btn" data-preset onclick="addReaction(this,'❤️')">❤️ <span>0</span></button>
         <button class="react-btn react-btn--add" onclick="showReactPicker(this)">+</button>
       </div>
     </div>
