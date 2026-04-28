@@ -160,21 +160,30 @@ body::before {
 
   <script type="module">
     import { supabase } from './supabase-client.js';
+    import { computeInitials } from './auth.js';
 
-    // If already signed in, skip to the right page
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
+    async function ensureProfile(user) {
+      const name = user.user_metadata?.display_name || user.email.split('@')[0];
+      await supabase.from('profiles').insert({
+        id:           user.id,
+        display_name: name,
+        initials:     computeInitials(name),
+      });
+    }
+
+    async function redirectAfterLogin(user) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('couple_id')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single();
-      if (profile) {
-        window.location.replace(profile.couple_id ? 'feed.html' : 'pair.html');
-      } else {
-        await supabase.auth.signOut();
-      }
+      if (!profile) await ensureProfile(user);
+      window.location.replace(profile?.couple_id ? 'feed.html' : 'pair.html');
     }
+
+    // If already signed in, skip to the right page
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) await redirectAfterLogin(session.user);
 
     const btn   = document.getElementById('btn-login');
     const error = document.getElementById('login-error');
@@ -208,13 +217,7 @@ body::before {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('couple_id')
-        .eq('id', data.user.id)
-        .single();
-
-      window.location.replace(profile?.couple_id ? 'feed.html' : 'pair.html');
+      await redirectAfterLogin(data.user);
     });
   </script>
 </body>
