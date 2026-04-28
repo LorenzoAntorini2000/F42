@@ -162,28 +162,40 @@ body::before {
     import { supabase } from './supabase-client.js';
     import { computeInitials } from './auth.js';
 
-    async function ensureProfile(user) {
-      const name = user.user_metadata?.display_name || user.email.split('@')[0];
-      await supabase.from('profiles').insert({
-        id:           user.id,
-        display_name: name,
-        initials:     computeInitials(name),
-      });
-    }
-
-    async function redirectAfterLogin(user) {
-      const { data: profile } = await supabase
+    async function resolveProfile(user) {
+      let { data: profile } = await supabase
         .from('profiles')
         .select('couple_id')
         .eq('id', user.id)
         .single();
-      if (!profile) await ensureProfile(user);
-      window.location.replace(profile?.couple_id ? 'feed.html' : 'pair.html');
+
+      if (!profile) {
+        const name = user.user_metadata?.display_name || user.email.split('@')[0];
+        const { error: insertErr } = await supabase.from('profiles').insert({
+          id:           user.id,
+          display_name: name,
+          initials:     computeInitials(name),
+        });
+        if (!insertErr) {
+          const { data: refetched } = await supabase
+            .from('profiles').select('couple_id').eq('id', user.id).single();
+          profile = refetched;
+        }
+      }
+
+      return profile;
     }
 
     // If already signed in, skip to the right page
     const { data: { session } } = await supabase.auth.getSession();
-    if (session) await redirectAfterLogin(session.user);
+    if (session) {
+      const profile = await resolveProfile(session.user);
+      if (profile) {
+        window.location.replace(profile.couple_id ? 'feed.html' : 'pair.html');
+      } else {
+        await supabase.auth.signOut();
+      }
+    }
 
     const btn   = document.getElementById('btn-login');
     const error = document.getElementById('login-error');
@@ -217,7 +229,14 @@ body::before {
         return;
       }
 
-      await redirectAfterLogin(data.user);
+      const profile = await resolveProfile(data.user);
+      if (profile) {
+        window.location.replace(profile.couple_id ? 'feed.html' : 'pair.html');
+      } else {
+        showError('Account setup failed — your profile could not be loaded. Check that Supabase migrations have been applied.');
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+      }
     });
   </script>
 </body>
