@@ -699,6 +699,143 @@ body::before {
   .daily-summary { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
 }
+
+/* ── Workout Calendar ── */
+.cal-card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 1.25rem;
+  backdrop-filter: blur(12px); box-shadow: var(--shadow-sm);
+}
+.cal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.cal-nav {
+  background: rgba(255,255,255,0.70); border: 1.5px solid var(--border-md);
+  border-radius: var(--radius-sm); width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1.3rem; line-height: 1; color: var(--text-2);
+  transition: background 0.12s, color 0.12s; padding: 0;
+}
+.cal-nav:hover { background: var(--bg-card); color: var(--text-1); }
+.cal-month-label {
+  font-family: var(--font-display); font-size: 1.1rem; font-weight: 700;
+  color: var(--text-1);
+}
+.cal-weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.25rem;
+}
+.cal-weekdays span {
+  text-align: center; font-size: 0.65rem; font-weight: 700;
+  color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 0.2rem 0;
+}
+.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-day {
+  min-height: 48px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  border-radius: 8px; cursor: pointer; padding: 4px 2px;
+  transition: background 0.12s;
+}
+.cal-day:hover:not(.cal-day--empty) { background: rgba(148,163,184,0.10); }
+.cal-day--empty { cursor: default; pointer-events: none; }
+.cal-day-num {
+  font-size: 0.82rem; font-weight: 600; color: var(--text-2);
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+}
+.cal-day--today .cal-day-num {
+  background: linear-gradient(135deg, var(--green), var(--green-dk)); color: #fff;
+}
+.cal-day--selected {
+  background: rgba(123,108,246,0.07);
+  box-shadow: inset 0 0 0 1.5px rgba(123,108,246,0.28);
+}
+.cal-day--selected .cal-day-num { color: var(--purple-dk); }
+.cal-dots { display: flex; gap: 2px; }
+.cal-dot { width: 5px; height: 5px; border-radius: 50%; }
+.cal-dot--done    { background: var(--green); }
+.cal-dot--planned { background: var(--purple); }
+
+/* ── Day Panel ── */
+.day-panel {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 1.25rem;
+  backdrop-filter: blur(12px); box-shadow: var(--shadow-sm);
+  animation: entryIn 0.22s cubic-bezier(0.22,1,0.36,1);
+}
+.day-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;
+}
+.day-panel-date {
+  font-family: var(--font-display); font-size: 0.975rem; font-weight: 700;
+  color: var(--text-1);
+}
+.day-panel-btns { display: flex; gap: 0.5rem; }
+.dp-btn {
+  padding: 0.4rem 0.875rem; border-radius: 99px; border: none;
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: transform 0.12s, box-shadow 0.12s;
+}
+.dp-btn--plan {
+  background: linear-gradient(135deg, var(--purple), var(--purple-dk));
+  color: #fff; box-shadow: 0 3px 12px rgba(123,108,246,0.22);
+}
+.dp-btn--plan:hover  { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(123,108,246,0.32); }
+.dp-btn--log {
+  background: linear-gradient(135deg, var(--green), var(--green-dk));
+  color: #fff; box-shadow: 0 3px 12px rgba(52,199,123,0.22);
+}
+.dp-btn--log:hover   { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(52,199,123,0.32); }
+.dp-empty { text-align: center; padding: 1.5rem 0; color: var(--text-3); font-size: 0.84rem; }
+
+/* ── Workout Items ── */
+.wo-item {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); margin-bottom: 0.5rem;
+  transition: box-shadow 0.15s;
+}
+.wo-item:last-child { margin-bottom: 0; }
+.wo-item:hover { box-shadow: var(--shadow-sm); }
+.wo-icon {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.95rem; font-weight: 700;
+}
+.wo-icon--done    { background: var(--green-lt);   color: var(--green-dk); }
+.wo-icon--planned { background: var(--purple-lt);  color: var(--purple-dk); }
+.wo-body { flex: 1; min-width: 0; }
+.wo-title { font-size: 0.875rem; font-weight: 600; color: var(--text-1); margin-bottom: 0.1rem; }
+.wo-who   { font-size: 0.72rem;  color: var(--text-3); margin-bottom: 0.3rem; }
+.wo-stats { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.wo-stat  {
+  font-size: 0.7rem; font-weight: 500; color: var(--text-2);
+  background: rgba(148,163,184,0.10); border: 1px solid var(--border);
+  border-radius: 99px; padding: 0.1rem 0.45rem;
+}
+.wo-actions { display: flex; align-items: center; flex-shrink: 0; }
+.wo-confirm-btn {
+  padding: 0.28rem 0.7rem; border: none; border-radius: 99px;
+  background: linear-gradient(135deg, var(--green), var(--green-dk));
+  color: #fff; font-size: 0.7rem; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body); white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(52,199,123,0.18);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.wo-confirm-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(52,199,123,0.28); }
+
+/* ── Legend ── */
+.cal-legend {
+  display: flex; gap: 1rem; align-items: center;
+  margin-top: 0.75rem; padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.cal-legend-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; color: var(--text-3); font-weight: 500; }
   </style>
 </head>
 <body class="app-body">
@@ -736,21 +873,338 @@ body::before {
     </aside>
     <main class="app-main">
       <div class="app-topbar"><h1 class="app-page-title">Workouts</h1></div>
-      <div class="placeholder-section">
-        <div class="placeholder-icon">🏃</div>
-        <h2 class="placeholder-title">Workouts coming soon</h2>
-        <p class="placeholder-body">Log sessions, view your partner's activity, and find shared training slots on your couple calendar.</p>
-        <a href="feed.html" class="btn btn-primary" style="display:inline-flex;margin-top:1.5rem;">Back to feed</a>
+
+      <!-- Calendar -->
+      <div class="cal-card">
+        <div class="cal-header">
+          <button class="cal-nav" id="cal-prev">&#8249;</button>
+          <span class="cal-month-label" id="cal-month-label"></span>
+          <button class="cal-nav" id="cal-next">&#8250;</button>
+        </div>
+        <div class="cal-weekdays">
+          <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+        <div class="cal-legend">
+          <span class="cal-legend-item"><span class="cal-dot cal-dot--done"></span> Completed</span>
+          <span class="cal-legend-item"><span class="cal-dot cal-dot--planned"></span> Planned</span>
+        </div>
+      </div>
+
+      <!-- Day detail panel (shown when a day is selected) -->
+      <div class="day-panel" id="day-panel" hidden>
+        <div class="day-panel-head">
+          <span class="day-panel-date" id="dp-date"></span>
+          <div class="day-panel-btns" id="dp-btns"></div>
+        </div>
+        <div id="dp-list"></div>
       </div>
     </main>
   </div>
+  <!-- Workout modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title"></span>
+        <button class="modal-close" id="modal-close">&#x2715;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
   <script src="main.js"></script>
   <script type="module">
     import { guardSession, populateSidebar } from './auth.js';
-    const profile = await guardSession();
-    if (profile) {
-      await populateSidebar(profile);
-      document.body.style.visibility = 'visible';
+    import { supabase } from './supabase-client.js';
+
+    // ── State ──────────────────────────────────────────────────────────────────
+    let profile;
+    const today   = new Date();
+    let viewYear  = today.getFullYear();
+    let viewMonth = today.getMonth(); // 0-indexed
+    let workouts  = [];
+    let selectedDate = null;
+    let modalMode = null; // 'plan' | 'log'
+    let modalDate = null;
+
+    // ── Boot ───────────────────────────────────────────────────────────────────
+    profile = await guardSession();
+    if (!profile) throw new Error('Not authenticated');
+    if (!profile.couple_id) { location.href = 'pair.html'; }
+    await populateSidebar(profile);
+    document.body.style.visibility = 'visible';
+    setupListeners();
+    await loadAndRender();
+
+    // ── Data ───────────────────────────────────────────────────────────────────
+    async function loadWorkouts() {
+      const { data, error } = await supabase
+        .from('feed_entries')
+        .select('*, profiles(display_name, initials)')
+        .eq('couple_id', profile.couple_id)
+        .eq('entry_type', 'workout')
+        .order('logged_at', { ascending: true });
+      if (error) { console.error('loadWorkouts:', error); return []; }
+      return data || [];
+    }
+
+    function entryDate(e) {
+      return e.scheduled_for || e.logged_at.substring(0, 10);
+    }
+
+    function buildWorkoutMap() {
+      const map = {};
+      for (const w of workouts) {
+        const d = entryDate(w);
+        if (!map[d]) map[d] = [];
+        map[d].push(w);
+      }
+      return map;
+    }
+
+    async function loadAndRender() {
+      workouts = await loadWorkouts();
+      renderCalendar();
+      if (selectedDate) renderDayPanel(selectedDate);
+    }
+
+    // ── Calendar ───────────────────────────────────────────────────────────────
+    const MONTHS = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+
+    function renderCalendar() {
+      const map      = buildWorkoutMap();
+      const todayStr = toDateStr(today);
+
+      document.getElementById('cal-month-label').textContent =
+        `${MONTHS[viewMonth]} ${viewYear}`;
+
+      const firstDow    = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7; // 0=Mon
+      const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+      let html = '';
+      for (let i = 0; i < firstDow; i++) html += '<div class="cal-day cal-day--empty"></div>';
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`;
+        const dayWo   = map[dateStr] || [];
+
+        let cls = 'cal-day';
+        if (dateStr === todayStr)    cls += ' cal-day--today';
+        if (dateStr === selectedDate) cls += ' cal-day--selected';
+
+        const dots = [
+          dayWo.some(w => (w.status ?? 'completed') === 'completed') ? '<span class="cal-dot cal-dot--done"></span>' : '',
+          dayWo.some(w => w.status === 'planned')                     ? '<span class="cal-dot cal-dot--planned"></span>' : '',
+        ].join('');
+
+        html += `<div class="${cls}" data-date="${dateStr}">
+          <span class="cal-day-num">${d}</span>
+          ${dots ? `<div class="cal-dots">${dots}</div>` : ''}
+        </div>`;
+      }
+      document.getElementById('cal-days').innerHTML = html;
+    }
+
+    // ── Day panel ──────────────────────────────────────────────────────────────
+    function renderDayPanel(dateStr) {
+      document.getElementById('day-panel').hidden = false;
+
+      const d = new Date(dateStr + 'T12:00:00');
+      document.getElementById('dp-date').textContent = d.toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      });
+
+      const isPast = dateStr < toDateStr(today);
+
+      const btnsEl = document.getElementById('dp-btns');
+      btnsEl.innerHTML = [
+        !isPast ? `<button class="dp-btn dp-btn--plan" data-action="plan">+ Plan</button>` : '',
+        `<button class="dp-btn dp-btn--log" data-action="log">+ Log done</button>`,
+      ].join('');
+      btnsEl.querySelectorAll('.dp-btn').forEach(btn =>
+        btn.addEventListener('click', () => openModal(btn.dataset.action, dateStr))
+      );
+
+      const map   = buildWorkoutMap();
+      const dayWo = (map[dateStr] || []).slice().sort((a, b) => {
+        if (a.status !== b.status) return a.status === 'planned' ? -1 : 1;
+        return a.logged_at < b.logged_at ? -1 : 1;
+      });
+
+      const listEl = document.getElementById('dp-list');
+      if (dayWo.length === 0) {
+        listEl.innerHTML = '<p class="dp-empty">No workouts for this day.</p>';
+        return;
+      }
+
+      listEl.innerHTML = dayWo.map(wo => {
+        const isDone = (wo.status ?? 'completed') === 'completed';
+        const isMe   = wo.user_id === profile.id;
+
+        const stats = [
+          wo.distance_km  ? `${wo.distance_km} km`  : '',
+          wo.duration_min ? `${wo.duration_min} min` : '',
+          wo.kcal         ? `${wo.kcal} kcal`        : '',
+        ].filter(Boolean).map(s => `<span class="wo-stat">${s}</span>`).join('');
+
+        const confirmBtn = (!isDone && isMe)
+          ? `<button class="wo-confirm-btn" data-id="${wo.id}">Mark done</button>` : '';
+
+        return `<div class="wo-item">
+          <div class="wo-icon ${isDone ? 'wo-icon--done' : 'wo-icon--planned'}">${isDone ? '✓' : '○'}</div>
+          <div class="wo-body">
+            <div class="wo-title">${escHtml(wo.title)}</div>
+            <div class="wo-who">${escHtml(wo.profiles?.display_name ?? '')}</div>
+            ${stats ? `<div class="wo-stats">${stats}</div>` : ''}
+          </div>
+          ${confirmBtn ? `<div class="wo-actions">${confirmBtn}</div>` : ''}
+        </div>`;
+      }).join('');
+
+      listEl.querySelectorAll('.wo-confirm-btn').forEach(btn =>
+        btn.addEventListener('click', () => confirmWorkout(btn.dataset.id))
+      );
+    }
+
+    // ── Modal ──────────────────────────────────────────────────────────────────
+    function openModal(mode, dateStr) {
+      modalMode = mode;
+      modalDate = dateStr;
+
+      const d   = new Date(dateStr + 'T12:00:00');
+      const lbl = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+      document.getElementById('modal-title').textContent =
+        mode === 'plan' ? `Plan a workout · ${lbl}` : `Log a workout · ${lbl}`;
+
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Activity</label>
+          <input class="form-input" type="text" id="wo-name"
+            placeholder="e.g. Morning run, Yoga, Gym session" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Duration (min)</label>
+            <input class="form-input" type="number" id="wo-min" placeholder="45" min="1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Calories burned</label>
+            <input class="form-input" type="number" id="wo-kcal" placeholder="300" min="0" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Distance (km, optional)</label>
+          <input class="form-input" type="number" id="wo-km" placeholder="5.0" step="0.1" min="0" />
+        </div>
+        <button class="form-submit" id="modal-submit">
+          ${mode === 'plan' ? 'Plan workout' : 'Log workout'}
+        </button>`;
+
+      document.getElementById('modal-overlay').classList.add('open');
+      document.getElementById('wo-name').focus();
+      document.getElementById('modal-submit').addEventListener('click', submitWorkout);
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      modalMode = null; modalDate = null;
+    }
+
+    async function submitWorkout() {
+      const name = document.getElementById('wo-name')?.value.trim();
+      const min  = parseInt(document.getElementById('wo-min')?.value)   || null;
+      const kcal = parseInt(document.getElementById('wo-kcal')?.value)  || null;
+      const km   = parseFloat(document.getElementById('wo-km')?.value)  || null;
+      if (!name) { document.getElementById('wo-name').focus(); return; }
+
+      const btn = document.getElementById('modal-submit');
+      btn.disabled = true; btn.textContent = 'Saving…';
+
+      const { error } = await supabase.from('feed_entries').insert({
+        couple_id:     profile.couple_id,
+        user_id:       profile.id,
+        entry_type:    'workout',
+        title:         name,
+        duration_min:  min,
+        kcal,
+        distance_km:   km,
+        scheduled_for: modalDate,
+        status:        modalMode === 'plan' ? 'planned' : 'completed',
+        logged_at:     new Date().toISOString(),
+      });
+
+      if (error) {
+        console.error('submitWorkout:', error);
+        btn.disabled = false;
+        btn.textContent = modalMode === 'plan' ? 'Plan workout' : 'Log workout';
+        return;
+      }
+      closeModal();
+      await loadAndRender();
+    }
+
+    async function confirmWorkout(id) {
+      const { error } = await supabase
+        .from('feed_entries')
+        .update({ status: 'completed', logged_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('user_id', profile.id);
+      if (error) { console.error('confirmWorkout:', error); return; }
+      await loadAndRender();
+    }
+
+    // ── Event setup ────────────────────────────────────────────────────────────
+    function setupListeners() {
+      document.getElementById('cal-prev').addEventListener('click', () => {
+        if (viewMonth === 0) { viewMonth = 11; viewYear--; } else viewMonth--;
+        clearSelectedIfOutOfView(); renderCalendar();
+      });
+      document.getElementById('cal-next').addEventListener('click', () => {
+        if (viewMonth === 11) { viewMonth = 0; viewYear++; } else viewMonth++;
+        clearSelectedIfOutOfView(); renderCalendar();
+      });
+
+      document.getElementById('cal-days').addEventListener('click', e => {
+        const cell = e.target.closest('[data-date]');
+        if (!cell) return;
+        const dateStr = cell.dataset.date;
+        if (selectedDate === dateStr) {
+          selectedDate = null;
+          document.getElementById('day-panel').hidden = true;
+          renderCalendar();
+          return;
+        }
+        selectedDate = dateStr;
+        renderCalendar();
+        renderDayPanel(dateStr);
+        setTimeout(() =>
+          document.getElementById('day-panel')
+            .scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+      });
+
+      document.getElementById('modal-close').addEventListener('click', closeModal);
+      document.getElementById('modal-overlay').addEventListener('click', e => {
+        if (e.target.id === 'modal-overlay') closeModal();
+      });
+    }
+
+    function clearSelectedIfOutOfView() {
+      if (!selectedDate) return;
+      const [sy, sm] = selectedDate.split('-').map(Number);
+      if (sy !== viewYear || sm - 1 !== viewMonth) {
+        selectedDate = null;
+        document.getElementById('day-panel').hidden = true;
+      }
+    }
+
+    // ── Utils ──────────────────────────────────────────────────────────────────
+    function pad(n)      { return String(n).padStart(2, '0'); }
+    function toDateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+    function escHtml(s)  {
+      return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
   </script>
 </body>
