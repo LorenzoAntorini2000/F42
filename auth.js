@@ -1,14 +1,12 @@
 /* F42 — auth.js · shared auth utilities (ES module) */
 
 import { supabase } from './supabase-client.js';
+import { navigate } from './router.js';
 
-/* Returns the current user's profile, or redirects to login.html if no session. */
+/* Returns the current user's profile, or navigates to #login if no session. */
 export async function guardSession() {
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    window.location.replace('login.html');
-    return null;
-  }
+  if (!session) { navigate('#login'); return null; }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -16,23 +14,18 @@ export async function guardSession() {
     .eq('id', session.user.id)
     .single();
 
-  if (!profile) {
-    window.location.replace('login.html');
-    return null;
-  }
-
+  if (!profile) { navigate('#login'); return null; }
   return profile;
 }
 
 /*
  * Fills the sidebar with real user data.
  * Expects elements with these IDs to exist in the page:
- *   #sidebar-avatar-me, #sidebar-avatar-partner, #btn-signout
+ *   #sidebar-avatar-me, #sidebar-avatar-partner
  */
 export async function populateSidebar(profile) {
   const meEl      = document.getElementById('sidebar-avatar-me');
   const partnerEl = document.getElementById('sidebar-avatar-partner');
-  const signoutEl = document.getElementById('btn-signout');
 
   if (meEl) meEl.textContent = profile.initials;
 
@@ -47,15 +40,11 @@ export async function populateSidebar(profile) {
   } else if (partnerEl) {
     partnerEl.textContent = '?';
   }
-
-  if (signoutEl) {
-    signoutEl.addEventListener('click', signOut);
-  }
 }
 
 export async function signOut() {
   await supabase.auth.signOut();
-  window.location.replace('login.html');
+  navigate('#landing');
 }
 
 /* Derives two-letter initials from a display name. */

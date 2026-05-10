@@ -4,7 +4,9 @@
       "Bash(supabase --version)",
       "Bash(supabase projects *)",
       "Bash(supabase db *)",
-      "Bash(supabase link *)"
+      "Bash(supabase link *)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

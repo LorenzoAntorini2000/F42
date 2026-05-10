@@ -4,20 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>F42 — Fit For Two</title>
+
+  <!-- PWA / home screen -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#34C77B" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="F42" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
   <style>
-/* ── F42 · Global & Landing · Soft Modern ── */
-
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
-
+/* ── Design tokens ── */
 :root {
   --bg:           #F0F4FF;
   --bg-card:      #FFFFFF;
   --surface-1:    rgba(255,255,255,0.75);
   --surface-2:    rgba(255,255,255,0.42);
-
   --green:        #34C77B;
   --green-lt:     #E8FAF1;
   --green-dk:     #1A9E5A;
@@ -26,25 +32,22 @@
   --purple-dk:    #5B4ED4;
   --pink:         #F472B6;
   --pink-lt:      #FFF0F7;
-
   --text-1:       #0F172A;
   --text-2:       #475569;
   --text-3:       #94A3B8;
   --border:       rgba(148,163,184,0.18);
   --border-md:    rgba(148,163,184,0.28);
-
   --radius-sm:    10px;
   --radius-md:    18px;
   --radius-lg:    28px;
-
   --font-display: 'Nunito', 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
   --font-body:    'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
-
-  --shadow-sm:  0 2px 8px rgba(15,23,42,0.06);
-  --shadow-md:  0 8px 32px rgba(15,23,42,0.10);
-  --shadow-lg:  0 24px 64px rgba(15,23,42,0.12);
+  --shadow-sm:    0 2px 8px rgba(15,23,42,0.06);
+  --shadow-md:    0 8px 32px rgba(15,23,42,0.10);
+  --shadow-lg:    0 24px 64px rgba(15,23,42,0.12);
 }
 
+/* ── Reset & base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; scroll-behavior: smooth; }
 
@@ -60,18 +63,26 @@ body {
 
 body::before {
   content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
+  position: fixed; inset: 0; z-index: -1;
   background:
-    radial-gradient(ellipse 80% 55% at 5% 8%, rgba(123,108,246,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 55% at 5% 8%,  rgba(123,108,246,0.14) 0%, transparent 60%),
     radial-gradient(ellipse 55% 45% at 92% 15%, rgba(52,199,123,0.12) 0%, transparent 55%),
     radial-gradient(ellipse 65% 55% at 50% 95%, rgba(244,114,182,0.10) 0%, transparent 60%),
     #F0F4FF;
   pointer-events: none;
 }
 
-/* ── Nav ── */
+/* ── Auth / pair view layout (centered full-height) ── */
+#view-login, #view-signup {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 1.5rem;
+}
+#view-pair {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 2rem 1.5rem;
+}
+
+/* ── Landing: Nav ── */
 .nav {
   position: sticky; top: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
@@ -81,19 +92,15 @@ body::before {
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   border-bottom: 1px solid var(--border);
 }
-
 .nav-logo {
-  font-family: var(--font-display);
-  font-size: 1.5rem; font-weight: 800;
+  font-family: var(--font-display); font-size: 1.5rem; font-weight: 800;
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, var(--green-dk) 0%, var(--purple) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
-
 .nav-links { display: flex; align-items: center; gap: 2rem; }
 .nav-links a { color: var(--text-2); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.15s; }
 .nav-links a:hover { color: var(--text-1); }
-
 .nav-cta {
   background: var(--text-1) !important; color: #fff !important;
   padding: 0.5rem 1.15rem; border-radius: 99px;
@@ -103,12 +110,11 @@ body::before {
 }
 .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(15,23,42,0.28) !important; }
 
-/* ── Hero ── */
+/* ── Landing: Hero ── */
 .hero {
   text-align: center; padding: 7rem 1.5rem 5rem;
   max-width: 760px; margin: 0 auto; position: relative;
 }
-
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 0.4rem;
   font-size: 0.75rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
@@ -116,27 +122,17 @@ body::before {
   border: 1px solid rgba(52,199,123,0.28);
   padding: 0.35rem 1rem; border-radius: 99px; margin-bottom: 2rem;
 }
-.hero-eyebrow::before {
-  content: ''; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--green); display: inline-block;
-}
-
+.hero-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; }
 .hero-title {
   font-family: var(--font-display);
   font-size: clamp(3rem, 8vw, 5.4rem); font-weight: 800;
-  line-height: 1.05; letter-spacing: -0.03em;
-  color: var(--text-1); margin-bottom: 1.5rem;
+  line-height: 1.05; letter-spacing: -0.03em; color: var(--text-1); margin-bottom: 1.5rem;
 }
 .hero-title .g {
   background: linear-gradient(135deg, var(--green) 0%, var(--purple) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
-
-.hero-subtitle {
-  font-size: 1.1rem; color: var(--text-2); line-height: 1.75;
-  margin-bottom: 2.5rem; font-weight: 400;
-}
-
+.hero-subtitle { font-size: 1.1rem; color: var(--text-2); line-height: 1.75; margin-bottom: 2.5rem; font-weight: 400; }
 .hero-actions { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 2.5rem; }
 
 /* ── Buttons ── */
@@ -148,239 +144,283 @@ body::before {
   transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
 }
 .btn:active { transform: scale(0.97) !important; }
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--green) 0%, var(--green-dk) 100%);
-  color: #fff; box-shadow: 0 6px 24px rgba(52,199,123,0.30);
-}
+.btn-primary { background: linear-gradient(135deg, var(--green) 0%, var(--green-dk) 100%); color: #fff; box-shadow: 0 6px 24px rgba(52,199,123,0.30); }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(52,199,123,0.40); }
-
-.btn-ghost {
-  background: var(--surface-1); color: var(--text-2);
-  border: 1px solid var(--border-md); backdrop-filter: blur(8px);
-}
+.btn-ghost { background: var(--surface-1); color: var(--text-2); border: 1px solid var(--border-md); backdrop-filter: blur(8px); }
 .btn-ghost:hover { background: var(--bg-card); color: var(--text-1); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 
-/* ── Pills ── */
+/* ── Landing: Pills ── */
 .hero-pill-row { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
-.pill {
-  font-size: 0.76rem; font-weight: 500; color: var(--text-2);
-  border: 1px solid var(--border-md); border-radius: 99px;
-  padding: 0.3rem 0.85rem; background: var(--surface-1); backdrop-filter: blur(8px);
-}
+.pill { font-size: 0.76rem; font-weight: 500; color: var(--text-2); border: 1px solid var(--border-md); border-radius: 99px; padding: 0.3rem 0.85rem; background: var(--surface-1); backdrop-filter: blur(8px); }
 
-/* ── Features ── */
+/* ── Landing: Features ── */
 .features { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
-
-.features-grid {
-  display: grid;
-  grid-template-columns: 1.55fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 1.25rem;
-}
-
-.feature-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 2rem 2rem 1.75rem;
-  display: flex; flex-direction: column; gap: 0.75rem;
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.22s, box-shadow 0.22s;
-}
+.features-grid { display: grid; grid-template-columns: 1.55fr 1fr; grid-template-rows: auto auto; gap: 1.25rem; }
+.feature-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem 2rem 1.75rem; display: flex; flex-direction: column; gap: 0.75rem; backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); box-shadow: var(--shadow-sm); transition: transform 0.22s, box-shadow 0.22s; }
 .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
 .feature-card--large { grid-row: span 2; }
-
-.feature-card--large  { background: linear-gradient(150deg, rgba(255,255,255,0.90) 0%, rgba(232,250,241,0.65) 100%); border-color: rgba(52,199,123,0.12); }
+.feature-card--large { background: linear-gradient(150deg, rgba(255,255,255,0.90) 0%, rgba(232,250,241,0.65) 100%); border-color: rgba(52,199,123,0.12); }
 .feature-card:nth-child(2) { background: linear-gradient(150deg, rgba(255,255,255,0.90) 0%, rgba(240,238,255,0.65) 100%); border-color: rgba(123,108,246,0.12); }
 .feature-card:nth-child(3) { background: linear-gradient(150deg, rgba(255,255,255,0.90) 0%, rgba(255,240,247,0.65) 100%); border-color: rgba(244,114,182,0.12); }
-
-.feature-tag {
-  font-size: 0.7rem; font-weight: 700;
-  letter-spacing: 0.10em; text-transform: uppercase;
-}
-.feature-card--large .feature-tag  { color: var(--green-dk); }
+.feature-tag { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; }
+.feature-card--large .feature-tag { color: var(--green-dk); }
 .feature-card:nth-child(2) .feature-tag { color: var(--purple-dk); }
 .feature-card:nth-child(3) .feature-tag { color: #be185d; }
-
-.feature-title {
-  font-family: var(--font-display);
-  font-size: 1.85rem; font-weight: 700;
-  line-height: 1.1; letter-spacing: -0.02em; color: var(--text-1);
-}
-
+.feature-title { font-family: var(--font-display); font-size: 1.85rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: var(--text-1); }
 .feature-body { font-size: 0.875rem; color: var(--text-2); line-height: 1.7; }
-
-/* ── Feed mock ── */
 .feature-mock { margin-top: auto; }
-
-.feed-mock {
-  display: flex; flex-direction: column; gap: 0.5rem;
-  background: rgba(240,244,255,0.55);
-  border-radius: var(--radius-md); padding: 0.875rem;
-  border: 1px solid var(--border);
-}
-
-.mock-entry {
-  display: flex; align-items: center; gap: 0.75rem;
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 0.6rem 0.875rem;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.15s;
-}
+.feed-mock { display: flex; flex-direction: column; gap: 0.5rem; background: rgba(240,244,255,0.55); border-radius: var(--radius-md); padding: 0.875rem; border: 1px solid var(--border); }
+.mock-entry { display: flex; align-items: center; gap: 0.75rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 0.6rem 0.875rem; box-shadow: var(--shadow-sm); transition: transform 0.15s; }
 .mock-entry:hover { transform: translateX(3px); }
 .mock-entry--dim { opacity: 0.42; }
-
-.mock-avatar {
-  width: 34px; height: 34px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.66rem; font-weight: 700; flex-shrink: 0;
-}
+.mock-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.66rem; font-weight: 700; flex-shrink: 0; }
 .mock-avatar--a { background: linear-gradient(135deg, #bbf7d0, #86efac); color: #166534; }
 .mock-avatar--b { background: linear-gradient(135deg, #ddd6fe, #c4b5fd); color: #4c1d95; }
-
 .mock-info { flex: 1; min-width: 0; }
 .mock-name  { font-size: 0.77rem; font-weight: 600; color: var(--text-1); }
 .mock-detail{ font-size: 0.68rem; color: var(--text-3); }
 .mock-reaction { font-size: 1.05rem; flex-shrink: 0; }
-
-/* ── Sync mock ── */
-.sync-mock {
-  background: rgba(240,238,255,0.50); border-radius: var(--radius-md);
-  padding: 1rem; border: 1px solid rgba(123,108,246,0.14);
-}
-
+.sync-mock { background: rgba(240,238,255,0.50); border-radius: var(--radius-md); padding: 1rem; border: 1px solid rgba(123,108,246,0.14); }
 .sync-row { display: flex; gap: 0.3rem; justify-content: center; margin-bottom: 0.75rem; }
-
-.sync-day {
-  width: 30px; height: 36px; border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.66rem; font-weight: 600; color: var(--text-3);
-  background: rgba(255,255,255,0.75); border: 1px solid var(--border);
-  transition: transform 0.15s;
-}
-.sync-day.active {
-  background: linear-gradient(135deg, var(--purple), var(--purple-dk));
-  color: #fff; border-color: transparent;
-  box-shadow: 0 4px 12px rgba(123,108,246,0.35);
-  transform: translateY(-2px);
-}
-
+.sync-day { width: 30px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 0.66rem; font-weight: 600; color: var(--text-3); background: rgba(255,255,255,0.75); border: 1px solid var(--border); transition: transform 0.15s; }
+.sync-day.active { background: linear-gradient(135deg, var(--purple), var(--purple-dk)); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(123,108,246,0.35); transform: translateY(-2px); }
 .sync-legend { font-size: 0.68rem; color: var(--text-3); text-align: center; font-weight: 500; }
-
 .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; vertical-align: middle; margin-right: 2px; }
 .dot--a { background: var(--green); }
 .dot--b { background: var(--purple); }
-
-/* ── Score mock ── */
-.score-mock {
-  background: linear-gradient(135deg, rgba(255,240,247,0.65), rgba(240,238,255,0.55));
-  border-radius: var(--radius-md); padding: 1.25rem 1rem;
-  border: 1px solid rgba(244,114,182,0.14);
-  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-}
-
-.score-ring {
-  position: relative; display: flex; align-items: center; justify-content: center;
-  filter: drop-shadow(0 4px 16px rgba(123,108,246,0.22));
-}
-.score-label {
-  position: absolute;
-  font-family: var(--font-display); font-size: 1.6rem; font-weight: 800;
-  background: linear-gradient(135deg, var(--green-dk), var(--purple));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
+.score-mock { background: linear-gradient(135deg, rgba(255,240,247,0.65), rgba(240,238,255,0.55)); border-radius: var(--radius-md); padding: 1.25rem 1rem; border: 1px solid rgba(244,114,182,0.14); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.score-ring { position: relative; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 4px 16px rgba(123,108,246,0.22)); }
+.score-label { position: absolute; font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, var(--green-dk), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .score-sub { font-size: 0.7rem; color: var(--text-3); font-weight: 500; }
 
-/* ── How it works ── */
-.how {
-  padding: 6rem 1.5rem; text-align: center;
-  position: relative; overflow: hidden;
-}
-.how::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(160deg, #0F172A 0%, #1E1B4B 100%); z-index: 0;
-}
-.how::after {
-  content: ''; position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 60% 55% at 15% 55%, rgba(52,199,123,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 60% at 85% 30%, rgba(123,108,246,0.16) 0%, transparent 60%);
-  z-index: 0;
-}
+/* ── Landing: How it works ── */
+.how { padding: 6rem 1.5rem; text-align: center; position: relative; overflow: hidden; }
+.how::before { content: ''; position: absolute; inset: 0; background: linear-gradient(160deg, #0F172A 0%, #1E1B4B 100%); z-index: 0; }
+.how::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 55% at 15% 55%, rgba(52,199,123,0.12) 0%, transparent 60%), radial-gradient(ellipse 50% 60% at 85% 30%, rgba(123,108,246,0.16) 0%, transparent 60%); z-index: 0; }
 .how > * { position: relative; z-index: 1; }
-
-.how-title {
-  font-family: var(--font-display);
-  font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em;
-  margin-bottom: 0.6rem; color: #fff;
-}
+.how-title { font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.6rem; color: #fff; }
 .how-subtitle { font-size: 1rem; color: rgba(255,255,255,0.45); margin-bottom: 3.5rem; }
-
 .how-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; max-width: 920px; margin: 0 auto; }
-
-.how-step {
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
-  border-radius: var(--radius-md); padding: 2rem 1.5rem;
-  backdrop-filter: blur(12px); transition: background 0.2s, transform 0.2s;
-}
+.how-step { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: var(--radius-md); padding: 2rem 1.5rem; backdrop-filter: blur(12px); transition: background 0.2s, transform 0.2s; }
 .how-step:hover { background: rgba(255,255,255,0.10); transform: translateY(-4px); }
-
-.step-icon {
-  width: 44px; height: 44px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.3rem; margin: 0 auto 1rem;
-}
+.step-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin: 0 auto 1rem; }
 .step-icon--1 { background: rgba(52,199,123,0.18); }
 .step-icon--2 { background: rgba(123,108,246,0.18); }
 .step-icon--3 { background: rgba(244,114,182,0.18); }
-
-.step-num {
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em;
-  text-transform: uppercase; margin-bottom: 0.5rem;
-}
+.step-num { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 0.5rem; }
 .how-step:nth-child(1) .step-num { color: #6ee7a8; }
 .how-step:nth-child(2) .step-num { color: #a5b4fc; }
 .how-step:nth-child(3) .step-num { color: #f9a8d4; }
-
 .step-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: #fff; }
 .step-body  { font-size: 0.84rem; color: rgba(255,255,255,0.48); line-height: 1.65; }
 
-/* ── Footer ── */
-.footer {
-  text-align: center; padding: 3rem 1.5rem; border-top: 1px solid var(--border);
-}
-.footer-logo {
-  font-family: var(--font-display); font-size: 1.7rem; font-weight: 800;
-  margin-bottom: 0.5rem; display: inline-block;
-  background: linear-gradient(135deg, var(--green-dk), var(--purple));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
+/* ── Landing: Footer ── */
+.footer { text-align: center; padding: 3rem 1.5rem; border-top: 1px solid var(--border); }
+.footer-logo { font-family: var(--font-display); font-size: 1.7rem; font-weight: 800; margin-bottom: 0.5rem; display: inline-block; background: linear-gradient(135deg, var(--green-dk), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .footer-tagline { font-size: 0.84rem; color: var(--text-3); margin-bottom: 0.75rem; }
 .footer-links a { color: var(--text-2); font-size: 0.84rem; text-decoration: none; font-weight: 500; }
 .footer-links a:hover { color: var(--text-1); }
 
-/* ── Animations ── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.hero > * { animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) both; }
-.hero-eyebrow  { animation-delay: 0.05s; }
-.hero-title    { animation-delay: 0.12s; }
-.hero-subtitle { animation-delay: 0.20s; }
-.hero-actions  { animation-delay: 0.27s; }
-.hero-pill-row { animation-delay: 0.34s; }
+/* ── Auth forms ── */
+.auth-wrap { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 1.5rem; }
+.auth-logo { text-align: center; font-family: var(--font-display); font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(135deg, var(--green-dk), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.auth-card { background: rgba(255,255,255,0.92); border: 1px solid var(--border-md); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-lg); backdrop-filter: blur(24px); }
+.auth-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.35rem; }
+.auth-sub { font-size: 0.875rem; color: var(--text-2); margin-bottom: 1.75rem; line-height: 1.5; }
+.auth-error { display: none; margin-top: 1rem; padding: 0.65rem 0.9rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.22); border-radius: var(--radius-sm); color: #dc2626; font-size: 0.84rem; font-weight: 500; }
+.auth-error.visible { display: block; }
+.auth-success { display: none; margin-top: 1rem; padding: 0.65rem 0.9rem; background: rgba(52,199,123,0.10); border: 1px solid rgba(52,199,123,0.28); border-radius: var(--radius-sm); color: var(--green-dk); font-size: 0.84rem; font-weight: 500; }
+.auth-success.visible { display: block; }
+.auth-footer { text-align: center; font-size: 0.84rem; color: var(--text-2); }
+.auth-footer a { color: var(--green-dk); font-weight: 600; text-decoration: none; }
+.auth-footer a:hover { text-decoration: underline; }
 
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ── Shared form elements ── */
+.form-group { margin-bottom: 1.1rem; }
+.form-label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-2); margin-bottom: 0.4rem; letter-spacing: 0.02em; }
+.form-input { width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid var(--border-md); border-radius: var(--radius-sm); background: rgba(248,250,252,0.8); font-family: var(--font-body); font-size: 0.9rem; color: var(--text-1); transition: border-color 0.15s, box-shadow 0.15s; outline: none; }
+.form-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(52,199,123,0.14); background: #fff; }
+.form-submit { width: 100%; padding: 0.75rem; margin-top: 0.75rem; background: linear-gradient(135deg, var(--green), var(--green-dk)); color: #fff; border: none; border-radius: 99px; font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 18px rgba(52,199,123,0.28); }
+.form-submit:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(52,199,123,0.38); }
+.form-submit:active { transform: scale(0.97); }
+.form-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+/* ── Pair view ── */
+.pair-wrap { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 1.5rem; animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+.pair-logo { text-align: center; font-family: var(--font-display); font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(135deg, var(--green-dk), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.pair-card { background: rgba(255,255,255,0.92); border: 1px solid var(--border-md); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-lg); backdrop-filter: blur(24px); }
+.pair-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.3rem; }
+.pair-sub { font-size: 0.875rem; color: var(--text-2); margin-bottom: 1.75rem; line-height: 1.55; }
+.pair-section { display: flex; flex-direction: column; gap: 0.75rem; }
+.pair-section-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.btn-generate { width: 100%; padding: 0.75rem 1.25rem; background: linear-gradient(135deg, var(--green), var(--green-dk)); color: #fff; border: none; border-radius: 99px; font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 18px rgba(52,199,123,0.28); }
+.btn-generate:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(52,199,123,0.38); }
+.btn-generate:active { transform: scale(0.97); }
+.btn-generate:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.pair-or { display: flex; align-items: center; gap: 0.75rem; margin: 1.25rem 0; color: var(--text-3); font-size: 0.82rem; font-weight: 500; }
+.pair-or::before, .pair-or::after { content: ''; flex: 1; height: 1px; background: var(--border-md); }
+.join-row { display: flex; gap: 0.5rem; }
+#input-join-code { flex: 1; letter-spacing: 0.05em; text-transform: uppercase; }
+#input-join-code::placeholder { letter-spacing: 0; text-transform: none; color: var(--text-3); }
+#input-join-code:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(123,108,246,0.14); }
+.btn-join { padding: 0.65rem 1.25rem; background: linear-gradient(135deg, var(--purple), var(--purple-dk)); color: #fff; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 14px rgba(123,108,246,0.26); white-space: nowrap; }
+.btn-join:hover  { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(123,108,246,0.36); }
+.btn-join:active { transform: scale(0.97); }
+.btn-join:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.pair-error { display: none; padding: 0.6rem 0.875rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.22); border-radius: var(--radius-sm); color: #dc2626; font-size: 0.84rem; font-weight: 500; }
+.pair-error.visible { display: block; }
+.code-box { background: linear-gradient(135deg, rgba(232,250,241,0.6), rgba(240,238,255,0.6)); border: 1.5px solid rgba(52,199,123,0.25); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; margin-bottom: 1rem; }
+.code-value { font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; letter-spacing: 0.12em; color: var(--text-1); line-height: 1; margin-bottom: 0.9rem; }
+.btn-copy { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 1.1rem; border-radius: 99px; border: 1.5px solid var(--border-md); background: rgba(255,255,255,0.8); font-family: var(--font-body); font-size: 0.82rem; font-weight: 600; color: var(--text-2); cursor: pointer; transition: background 0.12s, border-color 0.12s; }
+.btn-copy:hover { background: #fff; border-color: var(--green); color: var(--green-dk); }
+.btn-copy.copied { background: var(--green-lt); border-color: rgba(52,199,123,0.4); color: var(--green-dk); }
+.pair-status { display: flex; align-items: center; gap: 0.65rem; font-size: 0.875rem; font-weight: 500; color: var(--text-2); padding: 0.75rem 0; margin-top: 0.25rem; }
+.status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.status-dot--waiting { background: var(--purple); animation: pulse 1.6s ease-in-out infinite; }
+.status-dot--connected { background: var(--green); }
+.connected-state { text-align: center; padding: 1rem 0; }
+.connected-emoji { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
+.connected-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; background: linear-gradient(135deg, var(--green-dk), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.connected-sub { font-size: 0.875rem; color: var(--text-2); }
+.pair-footer { text-align: center; font-size: 0.82rem; color: var(--text-3); }
+.pair-footer a { color: var(--text-2); font-weight: 500; text-decoration: none; }
+.pair-footer a:hover { color: var(--text-1); }
+
+/* ── App shell ── */
+#app-shell { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 1rem;
+  display: flex; flex-direction: column; gap: 1.5rem;
+  position: sticky; top: 0; height: 100vh;
 }
-.feature-card { animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
-.feature-card:nth-child(1) { animation-delay: 0.10s; }
-.feature-card:nth-child(2) { animation-delay: 0.20s; }
-.feature-card:nth-child(3) { animation-delay: 0.28s; }
+.sidebar-logo { font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; padding: 0 0.5rem; letter-spacing: -0.02em; background: linear-gradient(135deg, var(--green-dk), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.couple-card { background: linear-gradient(135deg, rgba(232,250,241,0.7) 0%, rgba(240,238,255,0.7) 100%); border: 1px solid rgba(123,108,246,0.12); border-radius: var(--radius-md); padding: 0.875rem; display: flex; align-items: center; gap: 0.875rem; }
+.couple-avatars { display: flex; }
+.c-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; border: 2.5px solid rgba(255,255,255,0.90); box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
+.c-avatar--a { background: linear-gradient(135deg, #bbf7d0, #86efac); color: #166534; margin-right: -9px; z-index: 1; }
+.c-avatar--b { background: linear-gradient(135deg, #ddd6fe, #c4b5fd); color: #4c1d95; }
+.couple-score-wrap { flex: 1; }
+.couple-score-label { font-size: 0.65rem; color: var(--text-3); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.couple-score-val { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; line-height: 1.1; background: linear-gradient(135deg, var(--green-dk), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.app-nav { display: flex; flex-direction: column; gap: 0.2rem; }
+.app-nav-item { display: flex; align-items: center; gap: 0.625rem; padding: 0.575rem 0.875rem; border-radius: var(--radius-sm); font-size: 0.875rem; font-weight: 500; color: var(--text-2); text-decoration: none; transition: background 0.12s, color 0.12s; }
+.app-nav-item:hover { background: rgba(255,255,255,0.6); color: var(--text-1); }
+.app-nav-item.active { background: linear-gradient(135deg, rgba(232,250,241,0.8), rgba(240,238,255,0.8)); color: var(--green-dk); box-shadow: inset 0 0 0 1px rgba(52,199,123,0.15); }
+.sidebar-back { margin-top: auto; font-size: 0.78rem; color: var(--text-3); text-decoration: none; padding: 0 0.5rem; transition: color 0.12s; font-weight: 500; }
+.sidebar-back:hover { color: var(--text-1); }
+
+/* ── App main ── */
+.app-main { padding: 2rem 2.5rem; max-width: 780px; display: flex; flex-direction: column; gap: 1.5rem; }
+.app-topbar { display: flex; align-items: center; justify-content: space-between; }
+.app-page-title { font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-1); }
+.topbar-date { font-size: 0.82rem; color: var(--text-3); font-weight: 500; }
+
+/* ── Daily summary ── */
+.daily-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; }
+.summary-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem 1.125rem; backdrop-filter: blur(12px); box-shadow: var(--shadow-sm); }
+.summary-label { font-size: 0.72rem; color: var(--text-3); margin-bottom: 0.5rem; font-weight: 600; letter-spacing: 0.03em; }
+.summary-bar-wrap { height: 5px; background: rgba(148,163,184,0.18); border-radius: 99px; margin-bottom: 0.45rem; overflow: hidden; }
+.summary-bar { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(0.22,1,0.36,1); }
+.summary-bar--a { background: linear-gradient(90deg, var(--green), var(--green-dk)); }
+.summary-bar--b { background: linear-gradient(90deg, var(--purple), var(--purple-dk)); }
+.summary-val { font-size: 0.74rem; color: var(--text-2); font-feature-settings: 'tnum'; font-weight: 500; }
+
+/* ── Feed ── */
+.feed { display: flex; flex-direction: column; gap: 0.875rem; }
+.feed-entry { display: flex; gap: 0.875rem; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.125rem; backdrop-filter: blur(12px); box-shadow: var(--shadow-sm); transition: transform 0.2s, box-shadow 0.2s; animation: entryIn 0.3s cubic-bezier(0.22,1,0.36,1) both; }
+.feed-entry:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.entry-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
+.entry-avatar--a { background: linear-gradient(135deg, #bbf7d0, #86efac); color: #166534; }
+.entry-avatar--b { background: linear-gradient(135deg, #ddd6fe, #c4b5fd); color: #4c1d95; }
+.entry-body { flex: 1; min-width: 0; }
+.entry-header { display: flex; align-items: baseline; gap: 0.4rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+.entry-who  { font-size: 0.875rem; font-weight: 700; color: var(--text-1); }
+.entry-type { font-size: 0.8rem; color: var(--text-3); font-weight: 400; }
+.entry-time { font-size: 0.72rem; color: var(--text-3); margin-left: auto; font-weight: 500; }
+.entry-content { margin-bottom: 0.75rem; }
+.entry-meal-name { font-size: 0.925rem; color: var(--text-1); margin-bottom: 0.3rem; font-weight: 500; }
+.entry-macros { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.entry-macros span { font-size: 0.72rem; color: var(--text-3); font-weight: 500; background: rgba(148,163,184,0.12); border-radius: 99px; padding: 0.15rem 0.5rem; border: 1px solid var(--border); }
+.entry-workout-stats { display: flex; gap: 1.5rem; margin-top: 0.4rem; }
+.wstat { text-align: left; }
+.wstat-val { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--text-1); }
+.wstat-lbl { font-size: 0.68rem; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.entry-reactions { display: flex; gap: 0.375rem; align-items: center; flex-wrap: wrap; }
+.react-btn { display: flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.65rem; border-radius: 99px; border: 1px solid var(--border); background: rgba(255,255,255,0.6); font-size: 0.76rem; font-weight: 600; color: var(--text-2); cursor: pointer; transition: background 0.12s, border-color 0.12s, transform 0.1s; font-family: var(--font-body); backdrop-filter: blur(6px); }
+.react-btn:hover { background: var(--bg-card); border-color: var(--border-md); transform: scale(1.05); }
+.react-btn:active { transform: scale(0.95); }
+.react-btn.reacted { background: linear-gradient(135deg, rgba(232,250,241,0.9), rgba(240,238,255,0.9)); border-color: rgba(52,199,123,0.3); color: var(--green-dk); }
+.react-btn--add { width: 28px; padding: 0.25rem; justify-content: center; color: var(--text-3); font-size: 0.9rem; }
+
+/* ── Log bar ── */
+.log-bar { display: flex; gap: 0.875rem; padding-bottom: 2rem; }
+.log-btn { flex: 1; padding: 0.75rem 1rem; border-radius: 99px; font-family: var(--font-body); font-size: 0.875rem; font-weight: 600; cursor: pointer; border: none; transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s; }
+.log-btn:active { transform: scale(0.97); }
+.log-btn--meal { background: linear-gradient(135deg, var(--green), var(--green-dk)); color: #fff; box-shadow: 0 4px 18px rgba(52,199,123,0.28); }
+.log-btn--meal:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(52,199,123,0.38); }
+.log-btn--workout { background: linear-gradient(135deg, var(--purple), var(--purple-dk)); color: #fff; box-shadow: 0 4px 18px rgba(123,108,246,0.26); }
+.log-btn--workout:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(123,108,246,0.36); }
+
+/* ── Modal ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.40); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.modal-overlay.open { display: flex; }
+.modal { background: rgba(255,255,255,0.95); border-radius: var(--radius-lg); width: min(480px, 92vw); max-height: 90vh; overflow-y: auto; border: 1px solid var(--border-md); box-shadow: var(--shadow-lg); backdrop-filter: blur(24px); animation: modalIn 0.25s cubic-bezier(0.22,1,0.36,1); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+.modal-title { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; }
+.modal-close { background: rgba(148,163,184,0.12); border: none; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--text-3); cursor: pointer; transition: background 0.12s, color 0.12s; }
+.modal-close:hover { background: rgba(148,163,184,0.22); color: var(--text-1); }
+.modal-body { padding: 1.5rem; }
+
+/* ── Placeholder pages ── */
+.placeholder-section { text-align: center; padding: 5rem 2rem; max-width: 400px; margin: 0 auto; }
+.placeholder-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.placeholder-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; }
+.placeholder-body { font-size: 0.9rem; color: var(--text-2); line-height: 1.65; }
+
+/* ── Empty / loading states ── */
+.feed-empty { text-align: center; padding: 3.5rem 1.5rem; }
+.feed-empty-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.feed-empty-title { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+.feed-empty-body { font-size: 0.875rem; color: var(--text-2); line-height: 1.65; }
+.feed-loading { text-align: center; padding: 3rem; color: var(--text-3); font-size: 0.875rem; font-weight: 500; }
+
+/* ── Skeleton loading ── */
+@keyframes shimmer { 0% { background-position: -600px 0; } 100% { background-position: 600px 0; } }
+.skeleton { background: linear-gradient(90deg, rgba(148,163,184,0.10) 25%, rgba(148,163,184,0.20) 50%, rgba(148,163,184,0.10) 75%); background-size: 1200px 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: 6px; }
+.feed-skeleton { display: flex; gap: 0.875rem; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.125rem; backdrop-filter: blur(12px); box-shadow: var(--shadow-sm); }
+.feed-skeleton-avatar { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; }
+.feed-skeleton-body   { flex: 1; display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+.feed-skeleton-line   { height: 10px; }
+.feed-skeleton-line--short { width: 38%; }
+.feed-skeleton-line--med   { width: 60%; }
+.feed-skeleton-line--long  { width: 82%; }
+
+/* ── Animations ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+#view-landing .hero > * { animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) both; }
+#view-landing .hero-eyebrow  { animation-delay: 0.05s; }
+#view-landing .hero-title    { animation-delay: 0.12s; }
+#view-landing .hero-subtitle { animation-delay: 0.20s; }
+#view-landing .hero-actions  { animation-delay: 0.27s; }
+#view-landing .hero-pill-row { animation-delay: 0.34s; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+#view-landing .feature-card { animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+#view-landing .feature-card:nth-child(1) { animation-delay: 0.10s; }
+#view-landing .feature-card:nth-child(2) { animation-delay: 0.20s; }
+#view-landing .feature-card:nth-child(3) { animation-delay: 0.28s; }
+@keyframes entryIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.75); } }
+
+/* ── Ensure hidden attribute always hides elements regardless of display rules ── */
+[hidden] { display: none !important; }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
@@ -390,160 +430,309 @@ body::before {
   .feature-card--large { grid-row: span 1; }
   .how-steps { grid-template-columns: 1fr; gap: 1rem; }
   .hero { padding: 4.5rem 1.25rem 3rem; }
+  #app-shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; padding: 0.75rem 1rem; gap: 0.75rem; }
+  .sidebar-back { display: none; }
+  .app-nav { flex-direction: row; }
+  .app-main { padding: 1.25rem 1rem; }
+  .daily-summary { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
 }
   </style>
 </head>
 <body>
 
-  <nav class="nav">
-    <div class="nav-logo">F42</div>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#how-it-works">How it works</a>
-      <a href="login.html">Log in</a>
-      <a href="signup.html" class="nav-cta">Get started →</a>
-    </div>
-  </nav>
+  <!-- ════════ LANDING ════════ -->
+  <section id="view-landing" data-view hidden>
+    <nav class="nav">
+      <div class="nav-logo">F42</div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#login">Log in</a>
+        <a href="#signup" class="nav-cta">Get started →</a>
+      </div>
+    </nav>
 
-  <header class="hero">
-    <div class="hero-eyebrow">Fitness, together</div>
-    <h1 class="hero-title">
-      Stronger<br />
-      <span class="g">side by side.</span>
-    </h1>
-    <p class="hero-subtitle">
-      The couples fitness app where you share meals,<br />
-      celebrate every workout, and grow together — daily.
-    </p>
-    <div class="hero-actions">
-      <a href="signup.html" class="btn btn-primary">Get started →</a>
-      <a href="login.html" class="btn btn-ghost">Log in</a>
-    </div>
-    <div class="hero-pill-row">
-      <span class="pill">🥗 Shared meal feed</span>
-      <span class="pill">🏃 Workout sync</span>
-      <span class="pill">✨ Couple score</span>
-    </div>
-  </header>
+    <header class="hero">
+      <div class="hero-eyebrow">Fitness, together</div>
+      <h1 class="hero-title">Stronger<br /><span class="g">side by side.</span></h1>
+      <p class="hero-subtitle">The couples fitness app where you share meals,<br />celebrate every workout, and grow together — daily.</p>
+      <div class="hero-actions">
+        <a href="#signup" class="btn btn-primary">Get started →</a>
+        <a href="#login" class="btn btn-ghost">Log in</a>
+      </div>
+      <div class="hero-pill-row">
+        <span class="pill">🥗 Shared meal feed</span>
+        <span class="pill">🏃 Workout sync</span>
+        <span class="pill">✨ Couple score</span>
+      </div>
+    </header>
 
-  <section class="features" id="features">
-    <div class="features-grid">
-
-      <div class="feature-card feature-card--large">
-        <div class="feature-tag">Nutrition</div>
-        <h2 class="feature-title">Your shared<br />meal feed</h2>
-        <p class="feature-body">Log what you eat and see your partner's meals in a private, real-time timeline. React, cheer, and inspire each other — one plate at a time.</p>
-        <div class="feature-mock feed-mock">
-          <div class="mock-entry">
-            <div class="mock-avatar mock-avatar--a">AL</div>
-            <div class="mock-info">
-              <div class="mock-name">Alex logged lunch</div>
-              <div class="mock-detail">Grilled chicken salad · 480 kcal</div>
-            </div>
-            <div class="mock-reaction">🔥</div>
+    <section class="features" id="features">
+      <div class="features-grid">
+        <div class="feature-card feature-card--large">
+          <div class="feature-tag">Nutrition</div>
+          <h2 class="feature-title">Your shared<br />meal feed</h2>
+          <p class="feature-body">Log what you eat and see your partner's meals in a private, real-time timeline. React, cheer, and inspire each other — one plate at a time.</p>
+          <div class="feature-mock feed-mock">
+            <div class="mock-entry"><div class="mock-avatar mock-avatar--a">AL</div><div class="mock-info"><div class="mock-name">Alex logged lunch</div><div class="mock-detail">Grilled chicken salad · 480 kcal</div></div><div class="mock-reaction">🔥</div></div>
+            <div class="mock-entry"><div class="mock-avatar mock-avatar--b">MR</div><div class="mock-info"><div class="mock-name">Marco logged breakfast</div><div class="mock-detail">Oat bowl + berries · 390 kcal</div></div><div class="mock-reaction">❤️</div></div>
+            <div class="mock-entry mock-entry--dim"><div class="mock-avatar mock-avatar--a">AL</div><div class="mock-info"><div class="mock-name">Alex logged dinner</div><div class="mock-detail">Salmon + veggies · 610 kcal</div></div><div class="mock-reaction">👏</div></div>
           </div>
-          <div class="mock-entry">
-            <div class="mock-avatar mock-avatar--b">MR</div>
-            <div class="mock-info">
-              <div class="mock-name">Marco logged breakfast</div>
-              <div class="mock-detail">Oat bowl + berries · 390 kcal</div>
-            </div>
-            <div class="mock-reaction">❤️</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-tag">Training</div>
+          <h2 class="feature-title">Workout<br />sync</h2>
+          <p class="feature-body">Log sessions, share live activity, and find slots to train together on your shared calendar.</p>
+          <div class="feature-mock sync-mock">
+            <div class="sync-row"><div class="sync-day active">Mon</div><div class="sync-day active">Tue</div><div class="sync-day">Wed</div><div class="sync-day active">Thu</div><div class="sync-day">Fri</div><div class="sync-day active">Sat</div><div class="sync-day">Sun</div></div>
+            <div class="sync-legend"><span class="dot dot--a"></span> Alex &nbsp;<span class="dot dot--b"></span> Marco</div>
           </div>
-          <div class="mock-entry mock-entry--dim">
-            <div class="mock-avatar mock-avatar--a">AL</div>
-            <div class="mock-info">
-              <div class="mock-name">Alex logged dinner</div>
-              <div class="mock-detail">Salmon + veggies · 610 kcal</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-tag">Motivation</div>
+          <h2 class="feature-title">Couple<br />score</h2>
+          <p class="feature-body">One combined weekly score. You rise and fall together — not against each other.</p>
+          <div class="feature-mock score-mock">
+            <div class="score-ring">
+              <svg viewBox="0 0 88 88" width="88" height="88"><circle cx="44" cy="44" r="36" fill="none" stroke="rgba(148,163,184,0.15)" stroke-width="7"/><circle cx="44" cy="44" r="36" fill="none" stroke="url(#scoreGrad)" stroke-width="7" stroke-dasharray="188" stroke-dashoffset="38" stroke-linecap="round" transform="rotate(-90 44 44)"/><defs><linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#34C77B"/><stop offset="100%" stop-color="#7B6CF6"/></linearGradient></defs></svg>
+              <div class="score-label">82</div>
             </div>
-            <div class="mock-reaction">👏</div>
+            <div class="score-sub">This week's F42 score</div>
           </div>
         </div>
       </div>
+    </section>
 
-      <div class="feature-card">
-        <div class="feature-tag">Training</div>
-        <h2 class="feature-title">Workout<br />sync</h2>
-        <p class="feature-body">Log sessions, share live activity, and find slots to train together on your shared calendar.</p>
-        <div class="feature-mock sync-mock">
-          <div class="sync-row">
-            <div class="sync-day active">Mon</div>
-            <div class="sync-day active">Tue</div>
-            <div class="sync-day">Wed</div>
-            <div class="sync-day active">Thu</div>
-            <div class="sync-day">Fri</div>
-            <div class="sync-day active">Sat</div>
-            <div class="sync-day">Sun</div>
-          </div>
-          <div class="sync-legend">
-            <span class="dot dot--a"></span> Alex &nbsp;
-            <span class="dot dot--b"></span> Marco
-          </div>
-        </div>
+    <section class="how" id="how-it-works">
+      <h2 class="how-title">How it works</h2>
+      <p class="how-subtitle">Three steps to fitness as a team</p>
+      <div class="how-steps">
+        <div class="how-step"><div class="step-icon step-icon--1">🔗</div><div class="step-num">Step 01</div><h3 class="step-title">Connect as a couple</h3><p class="step-body">Create profiles and link accounts with a shared invite code. Completely private — just the two of you.</p></div>
+        <div class="how-step"><div class="step-icon step-icon--2">📋</div><div class="step-num">Step 02</div><h3 class="step-title">Log meals &amp; workouts</h3><p class="step-body">Quick-log food and sessions throughout the day. Your partner sees updates in real time on the shared feed.</p></div>
+        <div class="how-step"><div class="step-icon step-icon--3">🎉</div><div class="step-num">Step 03</div><h3 class="step-title">Motivate each other</h3><p class="step-body">React to entries, cheer on streaks, and watch your combined couple score grow every single week.</p></div>
       </div>
+    </section>
 
-      <div class="feature-card">
-        <div class="feature-tag">Motivation</div>
-        <h2 class="feature-title">Couple<br />score</h2>
-        <p class="feature-body">One combined weekly score. You rise and fall together — not against each other.</p>
-        <div class="feature-mock score-mock">
-          <div class="score-ring">
-            <svg viewBox="0 0 88 88" width="88" height="88">
-              <circle cx="44" cy="44" r="36" fill="none" stroke="rgba(148,163,184,0.15)" stroke-width="7"/>
-              <circle cx="44" cy="44" r="36" fill="none"
-                stroke="url(#scoreGrad)" stroke-width="7"
-                stroke-dasharray="188" stroke-dashoffset="38"
-                stroke-linecap="round" transform="rotate(-90 44 44)"/>
-              <defs>
-                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#34C77B"/>
-                  <stop offset="100%" stop-color="#7B6CF6"/>
-                </linearGradient>
-              </defs>
-            </svg>
-            <div class="score-label">82</div>
-          </div>
-          <div class="score-sub">This week's F42 score</div>
+    <footer class="footer">
+      <div class="footer-logo">F42</div>
+      <p class="footer-tagline">Fit For Two — built with ♥ on GitHub</p>
+      <p class="footer-links">
+        <a href="https://github.com/lorenzoantorini2000/F42" target="_blank">GitHub</a> ·
+        <a href="#feed">Open app</a>
+      </p>
+    </footer>
+  </section>
+
+  <!-- ════════ LOGIN ════════ -->
+  <section id="view-login" data-view hidden>
+    <div class="auth-wrap">
+      <div class="auth-logo">F42</div>
+      <div class="auth-card">
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-sub">Sign in to your account to continue.</p>
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email</label>
+          <input class="form-input" type="email" id="login-email" autocomplete="email" placeholder="you@example.com" />
         </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input class="form-input" type="password" id="login-password" autocomplete="current-password" placeholder="••••••••" />
+        </div>
+        <button class="form-submit" id="btn-login">Sign in</button>
+        <div class="auth-error" id="login-error"></div>
       </div>
-
+      <p class="auth-footer">No account yet? <a href="#signup">Create one →</a></p>
     </div>
   </section>
 
-  <section class="how" id="how-it-works">
-    <h2 class="how-title">How it works</h2>
-    <p class="how-subtitle">Three steps to fitness as a team</p>
-    <div class="how-steps">
-      <div class="how-step">
-        <div class="step-icon step-icon--1">🔗</div>
-        <div class="step-num">Step 01</div>
-        <h3 class="step-title">Connect as a couple</h3>
-        <p class="step-body">Create profiles and link accounts with a shared invite code. Completely private — just the two of you.</p>
+  <!-- ════════ SIGNUP ════════ -->
+  <section id="view-signup" data-view hidden>
+    <div class="auth-wrap">
+      <div class="auth-logo">F42</div>
+      <div class="auth-card">
+        <h1 class="auth-title">Create your account</h1>
+        <p class="auth-sub">Join F42 and invite your partner to connect.</p>
+        <div class="form-group">
+          <label class="form-label" for="signup-name">Display name</label>
+          <input class="form-input" type="text" id="signup-name" autocomplete="name" placeholder="e.g. Lorenzo" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-email">Email</label>
+          <input class="form-input" type="email" id="signup-email" autocomplete="email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-password">Password</label>
+          <input class="form-input" type="password" id="signup-password" autocomplete="new-password" placeholder="At least 6 characters" />
+        </div>
+        <button class="form-submit" id="btn-signup">Create account</button>
+        <div class="auth-error"   id="signup-error"></div>
+        <div class="auth-success" id="signup-success"></div>
       </div>
-      <div class="how-step">
-        <div class="step-icon step-icon--2">📋</div>
-        <div class="step-num">Step 02</div>
-        <h3 class="step-title">Log meals &amp; workouts</h3>
-        <p class="step-body">Quick-log food and sessions throughout the day. Your partner sees updates in real time on the shared feed.</p>
-      </div>
-      <div class="how-step">
-        <div class="step-icon step-icon--3">🎉</div>
-        <div class="step-num">Step 03</div>
-        <h3 class="step-title">Motivate each other</h3>
-        <p class="step-body">React to entries, cheer on streaks, and watch your combined couple score grow every single week.</p>
-      </div>
+      <p class="auth-footer">Already have an account? <a href="#login">Sign in →</a></p>
     </div>
   </section>
 
-  <footer class="footer">
-    <div class="footer-logo">F42</div>
-    <p class="footer-tagline">Fit For Two — built with ♥ on GitHub</p>
-    <p class="footer-links">
-      <a href="https://github.com/lorenzoantorini2000/F42" target="_blank">GitHub</a> ·
-      <a href="feed.html">Open app</a>
-    </p>
-  </footer>
+  <!-- ════════ PAIR ════════ -->
+  <section id="view-pair" data-view hidden>
+    <div class="pair-wrap">
+      <div class="pair-logo">F42</div>
+      <div class="pair-card">
+
+        <div id="state-create">
+          <h1 class="pair-title">Connect with your partner</h1>
+          <p class="pair-sub">Generate an invite code to share, or enter the code your partner sent you.</p>
+          <div class="pair-section">
+            <div class="pair-section-label">Create a code</div>
+            <button class="btn-generate" id="btn-generate">Generate invite code</button>
+            <div class="pair-error" id="create-error"></div>
+          </div>
+          <div class="pair-or">or</div>
+          <div class="pair-section">
+            <div class="pair-section-label">Enter a code</div>
+            <div class="join-row">
+              <input class="form-input" id="input-join-code" type="text" maxlength="9" placeholder="e.g. ABCD-1234" autocomplete="off" autocorrect="off" spellcheck="false" />
+              <button class="btn-join" id="btn-join">Join</button>
+            </div>
+            <div class="pair-error" id="join-error"></div>
+          </div>
+        </div>
+
+        <div id="state-waiting" style="display:none">
+          <h1 class="pair-title">Share this code</h1>
+          <p class="pair-sub">Send it to your partner via WhatsApp, text, or however you like.</p>
+          <div class="code-box">
+            <div class="code-value" id="code-display">····-····</div>
+            <button class="btn-copy" id="btn-copy">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Copy code
+            </button>
+          </div>
+          <div class="pair-status" id="status-waiting">
+            <span class="status-dot status-dot--waiting"></span>
+            Waiting for your partner…
+          </div>
+        </div>
+
+        <div id="state-connected" style="display:none">
+          <div class="connected-state">
+            <span class="connected-emoji">🎉</span>
+            <div class="connected-title">Partner connected!</div>
+            <p class="connected-sub">Your couple is ready. Taking you to the app…</p>
+          </div>
+        </div>
+
+      </div>
+      <p class="pair-footer"><a href="#" id="btn-switch-account">← Sign in with a different account</a></p>
+    </div>
+  </section>
+
+  <!-- ════════ APP SHELL (feed / workouts / goals) ════════ -->
+  <div id="app-shell" hidden>
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">F42</div>
+      <div class="couple-card">
+        <div class="couple-avatars">
+          <div class="c-avatar c-avatar--a" id="sidebar-avatar-me">··</div>
+          <div class="c-avatar c-avatar--b" id="sidebar-avatar-partner">··</div>
+        </div>
+        <div class="couple-score-wrap">
+          <div class="couple-score-label">Couple score</div>
+          <div class="couple-score-val" id="sidebar-score">—</div>
+        </div>
+      </div>
+      <nav class="app-nav">
+        <a href="#feed" data-route="feed" class="app-nav-item">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+          Feed
+        </a>
+        <a href="#workouts" data-route="workouts" class="app-nav-item">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8h2m10 0h2M3 8l1-3h8l1 3M3 8l1 3h8l1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Workouts
+        </a>
+        <a href="#goals" data-route="goals" class="app-nav-item">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1" fill="currentColor"/></svg>
+          Goals
+        </a>
+      </nav>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:0.35rem;padding:0 0.5rem;">
+        <a href="#landing" class="sidebar-back" style="margin-top:0;">← Home</a>
+        <button id="btn-signout" class="sidebar-back" style="background:none;border:none;cursor:pointer;text-align:left;color:var(--text-3);padding:0;font-size:0.78rem;font-weight:500;transition:color 0.12s;" onmouseenter="this.style.color='#dc2626'" onmouseleave="this.style.color='var(--text-3)'">Sign out</button>
+      </div>
+    </aside>
+
+    <!-- FEED VIEW -->
+    <section id="view-feed" data-view hidden>
+      <main class="app-main">
+        <div class="app-topbar">
+          <h1 class="app-page-title">Today's feed</h1>
+          <div class="topbar-date" id="today-date"></div>
+        </div>
+        <div class="daily-summary">
+          <div class="summary-card">
+            <div class="summary-label" id="summary-label-me">— · calories</div>
+            <div class="summary-bar-wrap"><div class="summary-bar summary-bar--a" id="summary-bar-me" style="width:0%"></div></div>
+            <div class="summary-val" id="summary-val-me">0 / 2 000 kcal</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label" id="summary-label-partner">— · calories</div>
+            <div class="summary-bar-wrap"><div class="summary-bar summary-bar--b" id="summary-bar-partner" style="width:0%"></div></div>
+            <div class="summary-val" id="summary-val-partner">0 / 2 000 kcal</div>
+          </div>
+        </div>
+        <div class="feed" id="feed">
+          <div class="feed-loading">Loading feed…</div>
+        </div>
+        <div class="log-bar">
+          <button class="log-btn log-btn--meal" onclick="openLogModal('meal')">+ Log meal</button>
+          <button class="log-btn log-btn--workout" onclick="openLogModal('workout')">+ Log workout</button>
+        </div>
+      </main>
+    </section>
+
+    <!-- WORKOUTS VIEW -->
+    <section id="view-workouts" data-view hidden>
+      <main class="app-main">
+        <div class="app-topbar"><h1 class="app-page-title">Workouts</h1></div>
+        <div class="placeholder-section">
+          <div class="placeholder-icon">🏃</div>
+          <h2 class="placeholder-title">Workouts coming soon</h2>
+          <p class="placeholder-body">Log sessions, view your partner's activity, and find shared training slots on your couple calendar.</p>
+          <a href="#feed" class="btn btn-primary" style="display:inline-flex;margin-top:1.5rem;">Back to feed</a>
+        </div>
+      </main>
+    </section>
+
+    <!-- GOALS VIEW -->
+    <section id="view-goals" data-view hidden>
+      <main class="app-main">
+        <div class="app-topbar"><h1 class="app-page-title">Goals</h1></div>
+        <div class="placeholder-section">
+          <div class="placeholder-icon">🎯</div>
+          <h2 class="placeholder-title">Goals coming soon</h2>
+          <p class="placeholder-body">Set individual and shared targets, track your F42 couple score, and celebrate milestones together.</p>
+          <a href="#feed" class="btn btn-primary" style="display:inline-flex;margin-top:1.5rem;">Back to feed</a>
+        </div>
+      </main>
+    </section>
+
+  </div><!-- /#app-shell -->
+
+  <!-- ════════ LOG MODAL (global) ════════ -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Log meal</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
 
   <script src="main.js"></script>
+  <script src="feed.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
